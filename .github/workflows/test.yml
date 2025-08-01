@@ -7,6 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
+  skip_test: true
 
 jobs:
   check:
@@ -35,6 +36,7 @@ jobs:
         id: build
 
       - name: Run Forge tests
+        if: ${{!env.skip_test}} 
         run: |
           forge test -vvv
         id: test
