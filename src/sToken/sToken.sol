@@ -71,8 +71,11 @@ contract sToken is ERC721, ERC2981 {
         super.safeTransferFrom(from, to, id, data);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC2981) returns (bool) {
-        return interfaceId == type(ERC721).interfaceId || interfaceId == type(ERC2981).interfaceId
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC2981) returns (bool) {
+        return interfaceId == 0x01ffc9a7 // ERC165
+            || interfaceId == 0x80ac58cd // ERC721
+            || interfaceId == 0x5b5e139f // ERC721Metadata
+            || interfaceId == 0x2a55205a // ERC2981
             || super.supportsInterface(interfaceId);
     }
 }
