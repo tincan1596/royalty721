@@ -15,4 +15,3 @@ contract mUSDC is ERC20, Ownable {
         emit minted(to, amount);
     }
 }
-
