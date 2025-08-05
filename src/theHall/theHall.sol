@@ -52,6 +52,9 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
         bool isERC721 = IERC165(address(_sToken)).supportsInterface(type(IERC721).interfaceId);
         require(isERC721, "sToken must be ERC721");
+
+        bool isERC2981 = IERC165(address(_sToken)).supportsInterface(0x2a55205a);
+        require(isERC2981, "sToken must support ERC2981");
     }
 
     function createListing(uint256 id, uint96 price) external whenNotPaused {
