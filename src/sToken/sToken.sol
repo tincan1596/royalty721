@@ -2,8 +2,8 @@
 pragma solidity ^0.8.30;
 
 import {ERC721} from "solmate/tokens/ERC721.sol";
-import {ERC2981} from "openzeppelin-contracts/token/common/ERC2981.sol";
-import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract sToken is ERC721, ERC2981 {
     error OnlyMarketplace();
