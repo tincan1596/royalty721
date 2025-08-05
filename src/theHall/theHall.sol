@@ -9,7 +9,10 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 interface ISToken {
-    function royaltyInfo(uint256 tokenId, uint256 salePrice) external view returns (address receiver, uint256 royaltyAmount);
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
+        view
+        returns (address receiver, uint256 royaltyAmount);
     function ownerOf(uint256 tokenId) external view returns (address);
     function safeTransferFrom(address from, address to, uint256 tokenId) external;
 }
@@ -37,7 +40,9 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
     event ListingCreated(uint256 indexed id, address indexed seller, uint96 price);
     event ListingCancelled(uint256 indexed id, address indexed seller);
-    event TokenPurchased(uint256 indexed id, address indexed seller, address indexed buyer, uint96 price, uint256 royalty);
+    event TokenPurchased(
+        uint256 indexed id, address indexed seller, address indexed buyer, uint96 price, uint256 royalty
+    );
     event TokensWithdrawn(address indexed token, uint256 amount, address indexed to, address indexed by);
 
     constructor(IERC20 _currency, ISToken _sToken) {
@@ -75,6 +80,8 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         currency.safeTransferFrom(msg.sender, address(this), lst.price);
 
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
+
+        require(royalty <= lst.price, "Invalid royalty amount");
         if (royalty > 0) currency.safeTransfer(recv, royalty);
 
         currency.safeTransfer(lst.seller, lst.price - royalty);
