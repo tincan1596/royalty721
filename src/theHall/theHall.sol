@@ -14,7 +14,7 @@ interface ISToken {
     function safeTransferFrom(address from, address to, uint256 tokenId) external;
 }
 
-abstract contract TheHall is ReentrancyGuard, Pausable, Ownable {
+contract TheHall is ReentrancyGuard, Pausable, Ownable {
     using SafeERC20 for IERC20;
 
     error ZeroPrice();
