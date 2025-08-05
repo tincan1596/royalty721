@@ -27,6 +27,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     error NotListed();
     error NotTokenOwner();
     error InvalidWithdrawal();
+    error InvalidRoyalty();
 
     struct Listing {
         address seller;
@@ -70,7 +71,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         emit ListingCancelled(id, msg.sender);
     }
 
-    function buyToken(uint256 id) external nonReentrant whenNotPaused {
+    function buyToken(uint256 id, uint256 expectedRoyalty) external nonReentrant whenNotPaused {
         Listing memory lst = listings[id];
         if (lst.seller == address(0)) revert NotListed();
         if (sToken.ownerOf(id) != lst.seller) revert NotTokenOwner();
@@ -81,7 +82,8 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
 
-        require(royalty <= lst.price, "Invalid royalty amount");
+        if (royalty <= lst.price) revert InvalidRoyalty();
+        if (royalty == expectedRoyalty) revert InvalidRoyalty();
         if (royalty > 0) currency.safeTransfer(recv, royalty);
 
         currency.safeTransfer(lst.seller, lst.price - royalty);
