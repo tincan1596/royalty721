@@ -14,7 +14,7 @@ contract Deploy is Script {
         vm.startBroadcast();
 
         // 1. Deploy mUSDC
-        MockUSDC usdc = new MockUSDC("Mock USDC", "mUSDC", 6);
+        mUSDC usdc = new mUSDC(deployer);
 
         // 2. Predict TheHall's address (deployer's next nonce will be used)
         uint256 futureNonce = vm.getNonce(deployer) + 1;
@@ -38,7 +38,7 @@ contract Deploy is Script {
     }
 
     // Predicts the address of the next contract deployment
-    function computeCreateAddress(address deployer, uint256 nonce) internal pure returns (address) {
+    function computeCreateAddress(address deployer, uint256 nonce) internal pure override returns (address) {
         if (nonce == 0x00) return address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, hex"80")))));
         if (nonce <= 0x7f) {
             return address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, uint8(nonce))))));
