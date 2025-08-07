@@ -35,19 +35,45 @@ contract Deploy is Script {
         }
 
         vm.stopBroadcast();
+
+        console.log("Predicted TheHall address: ", predictedHall);
+        console.log("Actual TheHall address: ", address(hall));
     }
 
-    // Predicts the address of the next contract deployment
     function computeCreateAddress(address deployer, uint256 nonce) internal pure override returns (address) {
-        if (nonce == 0x00) return address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, hex"80")))));
+        if (nonce == 0x00) {
+            return address(
+                uint160(uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), deployer, bytes1(0x80)))))
+            );
+        }
         if (nonce <= 0x7f) {
-            return address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, uint8(nonce))))));
+            return address(
+                uint160(
+                    uint256(keccak256(abi.encodePacked(bytes1(0xd6), bytes1(0x94), deployer, bytes1(uint8(nonce)))))
+                )
+            );
         }
         if (nonce <= 0xff) {
-            return address(uint160(uint256(keccak256(abi.encodePacked(hex"d794", deployer, hex"81", uint8(nonce))))));
+            return address(
+                uint160(
+                    uint256(
+                        keccak256(
+                            abi.encodePacked(bytes1(0xd7), bytes1(0x94), deployer, bytes1(0x81), bytes1(uint8(nonce)))
+                        )
+                    )
+                )
+            );
         }
         if (nonce <= 0xffff) {
-            return address(uint160(uint256(keccak256(abi.encodePacked(hex"d894", deployer, hex"82", uint16(nonce))))));
+            return address(
+                uint160(
+                    uint256(
+                        keccak256(
+                            abi.encodePacked(bytes1(0xd8), bytes1(0x94), deployer, bytes1(0x82), bytes2(uint16(nonce)))
+                        )
+                    )
+                )
+            );
         }
         revert("Nonce too high");
     }
