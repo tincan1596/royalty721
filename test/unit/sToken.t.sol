@@ -7,7 +7,7 @@ import {sToken} from "../../src/sToken/sToken.sol";
 contract sTokenTest is Test {
     sToken public token;
     address theHall = address(0xBEEF);
-    address alice = address(0xABCD);
+    address alice = address(0xABCD); // owner of the tokens
     address bob = address(0xCAFE);
 
     function setUp() public {
@@ -60,7 +60,6 @@ contract sTokenTest is Test {
     }
 
     function testTransferFrom_WorksWhenCalledByTheHall() public {
-        vm.startPrank(alice);
         token.approve(theHall, 3);
 
         vm.prank(theHall);
@@ -69,7 +68,6 @@ contract sTokenTest is Test {
     }
 
     function testTransferFrom_RevertsWhenCalledByNonHall() public {
-        vm.startPrank(alice);
         token.approve(bob, 2);
 
         vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 2, alice, bob));
@@ -78,7 +76,6 @@ contract sTokenTest is Test {
     }
 
     function testSafeTransferFrom_WorksWhenCalledByTheHall() public {
-        vm.startPrank(alice);
         token.approve(theHall, 4);
 
         vm.prank(theHall);
@@ -87,7 +84,6 @@ contract sTokenTest is Test {
     }
 
     function testSafeTransferFromWithData_WorksWhenCalledByTheHall() public {
-        vm.startPrank(alice);
         token.approve(theHall, 7);
 
         vm.prank(theHall);
@@ -96,7 +92,6 @@ contract sTokenTest is Test {
     }
 
     function testSafeTransferFrom_RevertsWhenCallerIsNotHall() public {
-        vm.startPrank(alice);
         token.approve(bob, 8);
 
         vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 8, alice, bob));
