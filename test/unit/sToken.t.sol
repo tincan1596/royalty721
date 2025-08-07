@@ -7,7 +7,7 @@ import {sToken} from "../../src/sToken/sToken.sol";
 contract sTokenTest is Test {
     sToken public token;
     address theHall = address(0xBEEF);
-    address alice = address(0xABCD); // owner of the tokens
+    address alice = address(0xABCD);
     address bob = address(0xCAFE);
 
     function setUp() public {
@@ -60,22 +60,25 @@ contract sTokenTest is Test {
     }
 
     function testTransferFrom_WorksWhenCalledByTheHall() public {
+        vm.startPrank(alice);
         token.approve(theHall, 3);
+        vm.stopPrank();
 
         vm.prank(theHall);
         token.transferFrom(alice, bob, 3);
         assertEq(token.ownerOf(3), bob);
     }
 
-    function testTransferFrom_RevertsWhenCalledByNonHall() public {
-        token.approve(bob, 2);
-        vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 2, alice, bob));
-        token.transferFrom(alice, bob, 2);
+    function testTransferFrom_RevertsWhenOwnerTriesToTransfer() public {
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 3, alice, bob));
+        token.transferFrom(alice, bob, 3);
     }
 
     function testSafeTransferFrom_WorksWhenCalledByTheHall() public {
+        vm.startPrank(alice);
         token.approve(theHall, 4);
+        vm.stopPrank();
 
         vm.prank(theHall);
         token.safeTransferFrom(alice, bob, 4);
@@ -83,19 +86,19 @@ contract sTokenTest is Test {
     }
 
     function testSafeTransferFromWithData_WorksWhenCalledByTheHall() public {
+        vm.startPrank(alice);
         token.approve(theHall, 7);
+        vm.stopPrank();
 
         vm.prank(theHall);
         token.safeTransferFrom(alice, bob, 7, "hello");
         assertEq(token.ownerOf(7), bob);
     }
 
-    function testSafeTransferFrom_RevertsWhenCallerIsNotHall() public {
-        token.approve(bob, 8);
-        vm.prank(bob);
-        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 8, alice, bob));
-
-        token.safeTransferFrom(alice, bob, 8);
+    function testSafeTransferFrom_RevertsWhenOwnerTriesToSafeTransfer() public {
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 4, alice, bob));
+        token.safeTransferFrom(alice, bob, 4);
     }
 
     function testSupportsInterface_ReturnsTrueForSupportedInterfaces() public view {
