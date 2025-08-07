@@ -69,9 +69,8 @@ contract sTokenTest is Test {
 
     function testTransferFrom_RevertsWhenCalledByNonHall() public {
         token.approve(bob, 2);
-
-        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 2, alice, bob));
         vm.prank(bob);
+        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 2, alice, bob));
         token.transferFrom(alice, bob, 2);
     }
 
@@ -93,9 +92,9 @@ contract sTokenTest is Test {
 
     function testSafeTransferFrom_RevertsWhenCallerIsNotHall() public {
         token.approve(bob, 8);
-
-        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 8, alice, bob));
         vm.prank(bob);
+        vm.expectRevert(abi.encodeWithSelector(sToken.TransferRestricted.selector, 8, alice, bob));
+
         token.safeTransferFrom(alice, bob, 8);
     }
 
