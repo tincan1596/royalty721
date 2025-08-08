@@ -57,6 +57,16 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         require(isERC2981, "sToken must support ERC2981");
     }
 
+    // only for the tests
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+    // delete the block written above after testing
+
     function createListing(uint256 id, uint96 price) external whenNotPaused {
         if (price == 0) revert ZeroPrice();
         if (sToken.ownerOf(id) != msg.sender) revert NotOwner();
