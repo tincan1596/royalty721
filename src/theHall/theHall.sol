@@ -28,10 +28,11 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     error NotTokenOwner();
     error InvalidWithdrawal();
     error InvalidRoyalty();
+    error NotApproved();
 
     struct Listing {
         address seller;
-        uint96 price;
+        uint256 price;
     }
 
     IERC20 public immutable currency;
@@ -39,10 +40,10 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
     mapping(uint256 => Listing) public listings;
 
-    event ListingCreated(uint256 indexed id, address indexed seller, uint96 price);
+    event ListingCreated(uint256 indexed id, address indexed seller, uint256 price);
     event ListingCancelled(uint256 indexed id, address indexed seller);
     event TokenPurchased(
-        uint256 indexed id, address indexed seller, address indexed buyer, uint96 price, uint256 royalty
+        uint256 indexed id, address indexed seller, address indexed buyer, uint256 price, uint256 royalty
     );
     event TokensWithdrawn(address indexed token, uint256 amount, address indexed to, address indexed by);
 
@@ -67,10 +68,16 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     }
     // delete the block written above after testing
 
-    function createListing(uint256 id, uint96 price) external whenNotPaused {
+    function createListing(uint256 id, uint256 price) external whenNotPaused {
         if (price == 0) revert ZeroPrice();
         if (sToken.ownerOf(id) != msg.sender) revert NotOwner();
         if (listings[id].seller != address(0)) revert AlreadyListed();
+
+        // Require that theHall is approved (either single approval or operator)
+        // Note: ISToken needs getApproved and isApprovedForAll; Solmate/ERC721 provide these.
+        address approved = IERC721(address(sToken)).getApproved(id);
+        bool isOperator = IERC721(address(sToken)).isApprovedForAll(msg.sender, address(this));
+        if (approved != address(this) || !isOperator) revert NotApproved(); // or custom error like NotApproved();
 
         listings[id] = Listing(msg.sender, price);
         emit ListingCreated(id, msg.sender, price);
