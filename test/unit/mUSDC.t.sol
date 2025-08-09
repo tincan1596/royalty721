@@ -15,7 +15,7 @@ contract mUSDCTest is Test {
         user1 = address(0xBEEF);
         user2 = address(0xCAFE);
 
-        token = new mUSDC(owner);
+        token = new mUSDC();
     }
 
     // --- Metadata ---
@@ -38,7 +38,7 @@ contract mUSDCTest is Test {
 
     function test_NonOwnerCannotMint() public {
         vm.startPrank(user1);
-        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user1));
+        vm.expectRevert("Ownable: caller is not the owner");
         token.mint(user2, 1000e6);
         vm.stopPrank();
     }

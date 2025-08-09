@@ -14,7 +14,7 @@ contract Deploy is Script {
         vm.startBroadcast();
 
         // 1. Deploy mUSDC
-        mUSDC usdc = new mUSDC(deployer);
+        mUSDC usdc = new mUSDC();
 
         // 2. Predict TheHall's address (deployer's next nonce will be used)
         uint256 futureNonce = vm.getNonce(deployer) + 1;
