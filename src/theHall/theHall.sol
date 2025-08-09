@@ -15,6 +15,8 @@ interface ISToken {
         returns (address receiver, uint256 royaltyAmount);
     function ownerOf(uint256 tokenId) external view returns (address);
     function safeTransferFrom(address from, address to, uint256 tokenId) external;
+    function getApproved(uint256 tokenId) external view returns (address operator);
+    function isApprovedForAll(address owner, address operator) external view returns (bool);
 }
 
 contract TheHall is ReentrancyGuard, Pausable, Ownable {
@@ -72,12 +74,9 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         if (price == 0) revert ZeroPrice();
         if (sToken.ownerOf(id) != msg.sender) revert NotOwner();
         if (listings[id].seller != address(0)) revert AlreadyListed();
-
-        // Require that theHall is approved (either single approval or operator)
-        // Note: ISToken needs getApproved and isApprovedForAll; Solmate/ERC721 provide these.
-        address approved = IERC721(address(sToken)).getApproved(id);
-        bool isOperator = IERC721(address(sToken)).isApprovedForAll(msg.sender, address(this));
-        if (approved != address(this) || !isOperator) revert NotApproved(); // or custom error like NotApproved();
+        if(
+            sToken.getApproved(id) == address(this) || sToken.isApprovedForAll(msg.sender, address(this)))
+            {revert NotApproved();}
 
         listings[id] = Listing(msg.sender, price);
         emit ListingCreated(id, msg.sender, price);
