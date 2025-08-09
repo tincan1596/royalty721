@@ -23,7 +23,7 @@ contract sToken is ERC721, ERC2981 {
         theHall = _theHall;
         baseURI = _baseURI;
         owner = msg.sender;
-        _setDefaultRoyalty(_theHall, 500);
+        _setDefaultRoyalty(owner, 500);
         unchecked {
             for (uint256 i; i < 10; ++i) {
                 _mint(owner, i);
