@@ -15,17 +15,19 @@ contract sToken is ERC721, ERC2981 {
     event ApprovalRestricted(uint256 indexed id, address indexed operator);
 
     address public immutable theHall;
+    address public immutable owner;
     string public baseURI;
 
     constructor(address _theHall, string memory _baseURI) ERC721("sToken", "sTK") {
         if (_theHall == address(0)) revert InvalidHallAddress();
         theHall = _theHall;
         baseURI = _baseURI;
+        owner = msg.sender;
         _setDefaultRoyalty(_theHall, 500);
         unchecked {
             for (uint256 i; i < 10; ++i) {
-                _mint(msg.sender, i);
-                emit Minted(i, msg.sender);
+                _mint(owner, i);
+                emit Minted(i, owner);
             }
         }
     }
