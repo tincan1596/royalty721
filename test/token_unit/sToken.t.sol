@@ -12,18 +12,13 @@ contract sTokenTest is Test {
 
     function setUp() public {
         vm.prank(alice);
-        token = new sToken(theHall, "ipfs://base/");
+        token = new sToken("ipfs://base/");
     }
 
     function testConstructor_MintsTenTokensToSender() public view {
         for (uint256 i = 0; i < 10; ++i) {
             assertEq(token.ownerOf(i), alice);
         }
-    }
-
-    function testConstructor_RevertsIfHallIsZero() public {
-        vm.expectRevert(sToken.InvalidHallAddress.selector);
-        new sToken(address(0), "ipfs://fail/");
     }
 
     function testTokenURI_ReturnsCorrectURI() public view {
