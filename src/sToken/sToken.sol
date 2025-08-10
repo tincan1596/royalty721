@@ -8,19 +8,20 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 contract sToken is ERC721, ERC2981 {
     error OnlyMarketplace();
     error TransferRestricted(uint256 id, address from, address to);
-    error InvalidHallAddress();
+    error AddressFixed();
+    error DontActSmart();
 
     event Minted(uint256 indexed id, address indexed to);
     event TransferBlocked(uint256 indexed id, address indexed from, address indexed to);
     event ApprovalRestricted(uint256 indexed id, address indexed operator);
 
-    address public immutable theHall;
+    address public theHall;
     address public immutable owner;
     string public baseURI;
+    bool public hallSet;
 
-    constructor(address _theHall, string memory _baseURI) ERC721("sToken", "sTK") {
-        if (_theHall == address(0)) revert InvalidHallAddress();
-        theHall = _theHall;
+    constructor(string memory _baseURI) ERC721("sToken", "sTK") {
+        theHall = address(0);
         baseURI = _baseURI;
         owner = msg.sender;
         _setDefaultRoyalty(owner, 500);
@@ -30,6 +31,15 @@ contract sToken is ERC721, ERC2981 {
                 emit Minted(i, owner);
             }
         }
+    }
+
+    function setTheHall(address _theHall) external {
+        if(hallSet) revert AddressFixed();
+        hallSet = true;
+        if (msg.sender != owner && _theHall == address(0)) {
+            revert DontActSmart();
+        }
+        theHall = _theHall;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
