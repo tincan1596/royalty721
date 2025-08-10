@@ -20,6 +20,7 @@ contract sToken is ERC721, ERC2981 {
     address public immutable owner;
     string public baseURI;
     bool public hallSet;
+    string internal constant _JSON_SUFFIX = ".json";
 
     constructor(string memory _baseURI) ERC721("sToken", "sTK") {
         theHall = address(0);
@@ -34,27 +35,24 @@ contract sToken is ERC721, ERC2981 {
         }
     }
 
-    modifier hallSetModifier() {
-        if (theHall == address(0)) {
-            revert HallNotFixed();
-        }
-        _; 
-    }  
+    function _checkHallSet() internal view {
+        if (!hallSet) revert HallNotFixed();
+    }
 
     function setTheHall(address _theHall) external {
-        if(hallSet) revert HallFixed();
+        if (hallSet) revert HallFixed();
         hallSet = true;
-        if (msg.sender != owner && _theHall == address(0)) {
-            revert DontActSmart();
-        }
+        if (msg.sender != owner) revert DontActSmart();
+        if (_theHall == address(0)) revert HallNotFixed();
         theHall = _theHall;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
-        return string(abi.encodePacked(baseURI, Strings.toString(id), ".json"));
+        return string(abi.encodePacked(baseURI, Strings.toString(id), _JSON_SUFFIX));
     }
 
-    function approve(address operator, uint256 id) public override hallSetModifier {
+    function approve(address operator, uint256 id) public override {
+        _checkHallSet();
         if (operator != theHall) {
             emit ApprovalRestricted(id, operator);
             revert OnlyMarketplace();
@@ -62,7 +60,8 @@ contract sToken is ERC721, ERC2981 {
         super.approve(operator, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public override hallSetModifier {
+    function setApprovalForAll(address operator, bool approved) public override {
+        _checkHallSet();
         if (operator != theHall) {
             emit ApprovalRestricted(type(uint256).max, operator);
             revert OnlyMarketplace();
@@ -70,21 +69,24 @@ contract sToken is ERC721, ERC2981 {
         super.setApprovalForAll(operator, approved);
     }
 
-    function transferFrom(address from, address to, uint256 id) public override hallSetModifier {
+    function transferFrom(address from, address to, uint256 id) public override {
+        _checkHallSet();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.transferFrom(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id) public override hallSetModifier {
+    function safeTransferFrom(address from, address to, uint256 id) public override {
+        _checkHallSet();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.safeTransferFrom(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public override hallSetModifier {
+    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public override {
+        _checkHallSet();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }

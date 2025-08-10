@@ -75,9 +75,9 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         if (price == 0) revert ZeroPrice();
         if (sToken.ownerOf(id) != msg.sender) revert NotOwner();
         if (listings[id].seller != address(0)) revert AlreadyListed();
-        if(
-            sToken.getApproved(id) != address(this) && !sToken.isApprovedForAll(msg.sender, address(this)))
-            {revert NotApproved();}
+        if (sToken.getApproved(id) != address(this) && !sToken.isApprovedForAll(msg.sender, address(this))) {
+            revert NotApproved();
+        }
 
         listings[id] = Listing(msg.sender, price);
         emit ListingCreated(id, msg.sender, price);
