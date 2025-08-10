@@ -8,7 +8,8 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 contract sToken is ERC721, ERC2981 {
     error OnlyMarketplace();
     error TransferRestricted(uint256 id, address from, address to);
-    error AddressFixed();
+    error HallFixed();
+    error HallNotFixed();
     error DontActSmart();
 
     event Minted(uint256 indexed id, address indexed to);
@@ -33,8 +34,15 @@ contract sToken is ERC721, ERC2981 {
         }
     }
 
+    modifier hallSetModifier() {
+        if (theHall == address(0)) {
+            revert HallNotFixed();
+        }
+        _; 
+    }  
+
     function setTheHall(address _theHall) external {
-        if(hallSet) revert AddressFixed();
+        if(hallSet) revert HallFixed();
         hallSet = true;
         if (msg.sender != owner && _theHall == address(0)) {
             revert DontActSmart();
@@ -46,7 +54,7 @@ contract sToken is ERC721, ERC2981 {
         return string(abi.encodePacked(baseURI, Strings.toString(id), ".json"));
     }
 
-    function approve(address operator, uint256 id) public override {
+    function approve(address operator, uint256 id) public override hallSetModifier {
         if (operator != theHall) {
             emit ApprovalRestricted(id, operator);
             revert OnlyMarketplace();
@@ -54,7 +62,7 @@ contract sToken is ERC721, ERC2981 {
         super.approve(operator, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public override {
+    function setApprovalForAll(address operator, bool approved) public override hallSetModifier {
         if (operator != theHall) {
             emit ApprovalRestricted(type(uint256).max, operator);
             revert OnlyMarketplace();
@@ -62,21 +70,21 @@ contract sToken is ERC721, ERC2981 {
         super.setApprovalForAll(operator, approved);
     }
 
-    function transferFrom(address from, address to, uint256 id) public override {
+    function transferFrom(address from, address to, uint256 id) public override hallSetModifier {
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.transferFrom(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id) public override {
+    function safeTransferFrom(address from, address to, uint256 id) public override hallSetModifier {
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.safeTransferFrom(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public override {
+    function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public override hallSetModifier {
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
