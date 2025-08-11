@@ -35,8 +35,13 @@ contract BaseTheHallTest is Test {
         vm.stopPrank();
 
         // Transfer a token from owner to seller
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, 0);
+        vm.startPrank(owner);
+        stoken.setApprovalForAll(address(hall), true);
+        hall.createListing(0, TOKEN_PRICE);
+        vm.stopPrank();
+        vm.startPrank(seller);
+        hall.buyToken(0, TOKEN_PRICE);
+        vm.stopPrank();
     }
 
     function approveMarketplaceAsSeller(uint256 tokenId) internal {
