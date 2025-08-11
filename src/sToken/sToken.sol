@@ -15,6 +15,7 @@ contract sToken is ERC721, ERC2981 {
     event Minted(uint256 indexed id, address indexed to);
     event TransferBlocked(uint256 indexed id, address indexed from, address indexed to);
     event ApprovalRestricted(uint256 indexed id, address indexed operator);
+    event HallSet(address indexed hall);
 
     address public theHall;
     address public immutable owner;
@@ -45,6 +46,7 @@ contract sToken is ERC721, ERC2981 {
         if (msg.sender != owner) revert DontActSmart();
         if (_theHall == address(0)) revert HallNotFixed();
         theHall = _theHall;
+        emit HallSet(_theHall);
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
