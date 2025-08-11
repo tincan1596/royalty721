@@ -19,13 +19,12 @@ contract sToken is ERC721, ERC2981 {
 
     address public theHall;
     address public immutable owner;
-    string public baseURI;
+    string internal constant baseURI = "ipfs://base/";
     bool public hallSet;
     string internal constant _JSON_SUFFIX = ".json";
 
-    constructor(string memory _baseURI) ERC721("sToken", "sTK") {
+    constructor() ERC721("sToken", "sTK") {
         theHall = address(0);
-        baseURI = _baseURI;
         owner = msg.sender;
         _setDefaultRoyalty(owner, 500);
         unchecked {
@@ -49,7 +48,7 @@ contract sToken is ERC721, ERC2981 {
         emit HallSet(_theHall);
     }
 
-    function tokenURI(uint256 id) public view override returns (string memory) {
+    function tokenURI(uint256 id) public pure override returns (string memory) {
         return string(abi.encodePacked(baseURI, Strings.toString(id), _JSON_SUFFIX));
     }
 
