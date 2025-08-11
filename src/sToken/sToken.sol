@@ -41,10 +41,10 @@ contract sToken is ERC721, ERC2981 {
     }
 
     function setTheHall(address _theHall) external {
-        if (hallSet) revert HallFixed();
-        hallSet = true;
         if (msg.sender != owner) revert DontActSmart();
         if (_theHall == address(0)) revert HallNotFixed();
+        if (hallSet) revert HallFixed();
+        hallSet = true;
         theHall = _theHall;
         emit HallSet(_theHall);
     }
