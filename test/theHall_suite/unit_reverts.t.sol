@@ -31,10 +31,8 @@ contract Unit_Revert is BaseTheHallTest {
     }
 
     function testCreateListing_notApproved_reverts() public {
-        uint256 id = 3;
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, id);
-
+        uint256 id = 0;
+        
         // ensure no approval
         vm.prank(seller);
         vm.expectRevert(abi.encodeWithSelector(TheHall.NotApproved.selector));
@@ -56,9 +54,7 @@ contract Unit_Revert is BaseTheHallTest {
     }
 
     function testBuyToken_notTokenOwner_reverts() public {
-        uint256 id = 4;
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, id);
+        uint256 id = 0;
 
         approveMarketplaceAsSeller(id);
         vm.prank(seller);
@@ -76,9 +72,7 @@ contract Unit_Revert is BaseTheHallTest {
     }
 
     function testBuyToken_invalidPrice_reverts() public {
-        uint256 id = 5;
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, id);
+        uint256 id = 0;
 
         approveMarketplaceAsSeller(id);
         vm.prank(seller);
