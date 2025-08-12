@@ -34,6 +34,12 @@ contract BaseTheHallTest is Test {
         usdc.mint(seller, INITIAL_USDC_SUPPLY);
         vm.stopPrank();
 
+        // Token mint to owner
+        vm.startPrank(owner);
+        stoken.mint(owner, 0);
+
+        vm.stopPrank();
+
         // Transfer a token from owner to seller
         vm.startPrank(owner);
         stoken.setApprovalForAll(address(hall), true);
