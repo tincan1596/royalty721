@@ -41,6 +41,7 @@ contract sToken is ERC721, ERC2981 {
         _mint(to, id);
         emit Minted(id, to);
     }
+    // delete after testing
 
     function _checkHallSet() internal view {
         if (!hallSet) revert HallNotFixed();

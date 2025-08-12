@@ -46,14 +46,16 @@ contract BaseTheHallTest is Test {
     }
 
     function approveMarketplaceAsSeller(uint256 tokenId) internal {
-        vm.prank(seller);
+        vm.startPrank(seller);
         stoken.approve(address(hall), tokenId);
+        vm.stopPrank();
     }
 
     function createAndListToken(uint256 tokenId, uint256 price) internal {
         approveMarketplaceAsSeller(tokenId);
-        vm.prank(seller);
+        vm.startPrank(seller);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
     }
 
     function fundBuyer(uint256 amount) internal {

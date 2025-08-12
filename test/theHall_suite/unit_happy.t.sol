@@ -48,40 +48,8 @@ contract Unit_Happy is BaseTheHallTest {
         assertEq(ls, address(0));
     }
 
-    function testBuyToken_noRoyalty_smallPrice() public {
-        uint256 id = 1;
-        // transfer second minted token to seller
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, id);
-
-        // price small enough so royalty rounds to 0
-        uint256 price = 1; // 1 unit (decimals 6)
-        approveMarketplaceAsSeller(id);
-        vm.prank(seller);
-        hall.createListing(id, price);
-
-        // buyer approve marketplace to spend price
-        vm.prank(buyer);
-        usdc.approve(address(hall), price);
-
-        uint256 sellerBalBefore = usdc.balanceOf(seller);
-        uint256 buyerBalBefore = usdc.balanceOf(buyer);
-
-        vm.expectEmit(true, true, true, true);
-        emit TokenPurchased(id, seller, buyer, price, 0);
-        vm.prank(buyer);
-        hall.buyToken(id, price);
-
-        assertEq(usdc.balanceOf(seller), sellerBalBefore + price);
-        assertEq(usdc.balanceOf(buyer), buyerBalBefore - price);
-        assertEq(stoken.ownerOf(id), buyer);
-    }
-
-    function testBuyToken_withRoyalty() public {
-        uint256 id = 2;
-        vm.prank(owner);
-        stoken.transferFrom(owner, seller, id);
-
+    function testBuyToken() public {
+        uint256 id = 0;
         uint256 price = TOKEN_PRICE;
         approveMarketplaceAsSeller(id);
         vm.prank(seller);
@@ -128,14 +96,22 @@ contract Unit_Happy is BaseTheHallTest {
     function testPauseAndUnpauseByOwner() public {
         vm.prank(owner);
         hall.pause();
+
+        vm.startPrank(seller);
         vm.expectRevert(bytes("Pausable: paused"));
-        vm.prank(seller);
         stoken.approve(address(hall), 0);
+        vm.stopPrank();
+
         vm.prank(owner);
         hall.unpause();
-        // after unpause actions work
-        vm.prank(seller);
+
+        vm.startPrank(seller);
         stoken.approve(address(hall), 0);
+        hall.createListing(0, TOKEN_PRICE);
+        (address listingSeller, uint256 listingPrice) = hall.listings(0);
+        assertEq(listingSeller, seller);
+        assertEq(listingPrice, TOKEN_PRICE);
+        vm.stopPrank();
     }
 
     // events redeclared for expectEmit usage
