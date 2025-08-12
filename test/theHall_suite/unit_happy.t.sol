@@ -98,8 +98,9 @@ contract Unit_Happy is BaseTheHallTest {
         hall.pause();
 
         vm.startPrank(seller);
-        vm.expectRevert(bytes("Pausable: paused"));
         stoken.approve(address(hall), 0);
+        vm.expectRevert(bytes("Pausable: paused"));
+        hall.createListing(0, TOKEN_PRICE);
         vm.stopPrank();
 
         vm.prank(owner);
