@@ -44,7 +44,7 @@ contract Unit_Happy is BaseTheHallTest {
         vm.prank(seller);
         hall.cancelListing(id);
 
-        (address ls, ) = hall.listings(id);
+        (address ls,) = hall.listings(id);
         assertEq(ls, address(0));
     }
 
@@ -141,6 +141,8 @@ contract Unit_Happy is BaseTheHallTest {
     // events redeclared for expectEmit usage
     event ListingCreated(uint256 indexed id, address indexed seller, uint256 price);
     event ListingCancelled(uint256 indexed id, address indexed seller);
-    event TokenPurchased(uint256 indexed id, address indexed seller, address indexed buyer, uint256 price, uint256 royalty);
+    event TokenPurchased(
+        uint256 indexed id, address indexed seller, address indexed buyer, uint256 price, uint256 royalty
+    );
     event TokensWithdrawn(address indexed token, uint256 amount, address indexed to, address indexed by);
 }

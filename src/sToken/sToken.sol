@@ -36,7 +36,7 @@ contract sToken is ERC721, ERC2981 {
     }
 
     // only for testing purposes
-    function mint (address to, uint256 id) external {
+    function mint(address to, uint256 id) external {
         if (msg.sender != owner) revert DontActSmart();
         _mint(to, id);
         emit Minted(id, to);

@@ -157,19 +157,30 @@ contract Unit_Revert is BaseTheHallTest {
 contract MockBadRoyalty is ISToken {
     address public ownerAddr;
     address private _approved;
+
     constructor(address _owner) {
         ownerAddr = _owner;
     }
-    function royaltyInfo(uint256, uint256 salePrice) external pure override returns (address receiver, uint256 royaltyAmount) {
+
+    function royaltyInfo(uint256, uint256 salePrice)
+        external
+        pure
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
         return (address(0xDEAD), salePrice); // royalty == price
     }
+
     function ownerOf(uint256) external view override returns (address) {
         return ownerAddr;
     }
+
     function safeTransferFrom(address, address, uint256) external override {}
+
     function getApproved(uint256) external view override returns (address) {
         return address(this);
     }
+
     function isApprovedForAll(address, address) external pure override returns (bool) {
         return true;
     }

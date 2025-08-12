@@ -37,7 +37,6 @@ contract BaseTheHallTest is Test {
         // Token mint to owner
         vm.startPrank(owner);
         stoken.mint(owner, 0);
-
         vm.stopPrank();
 
         // Transfer a token from owner to seller
