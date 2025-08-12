@@ -12,7 +12,7 @@ contract sTokenTest is Test {
 
     function setUp() public {
         vm.prank(alice);
-        token = new sToken("ipfs://base/");
+        token = new sToken();
     }
 
     function testConstructor_MintsTenTokensToSender() public view {
