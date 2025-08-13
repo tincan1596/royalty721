@@ -27,12 +27,6 @@ contract sToken is ERC721, ERC2981 {
         theHall = address(0);
         owner = msg.sender;
         _setDefaultRoyalty(owner, 500);
-        unchecked {
-            for (uint256 i; i < 10; ++i) {
-                _mint(owner, i);
-                emit Minted(i, owner);
-            }
-        }
     }
 
     // only for testing purposes
