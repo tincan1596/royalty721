@@ -14,8 +14,9 @@ contract sToken is ERC721, ERC2981 {
 
     event Minted(uint256 indexed id, address indexed to);
     event TransferBlocked(uint256 indexed id, address indexed from, address indexed to);
-    event ApprovalRestricted(uint256 indexed id, address indexed operator);
+    event Approved(uint256 indexed id, address indexed operator);
     event HallSet(address indexed hall);
+    event TokenTransfered(address indexed from, address indexed to, uint256 indexed id);
 
     address public theHall;
     address public immutable owner;
@@ -29,16 +30,10 @@ contract sToken is ERC721, ERC2981 {
         _setDefaultRoyalty(owner, 500);
     }
 
-    // only for testing purposes
     function mint(address to, uint256 id) external {
         if (msg.sender != owner) revert DontActSmart();
         _mint(to, id);
         emit Minted(id, to);
-    }
-    // delete after testing
-
-    function _checkHallSet() internal view {
-        if (!hallSet) revert HallNotFixed();
     }
 
     function setTheHall(address _theHall) external {
@@ -55,45 +50,48 @@ contract sToken is ERC721, ERC2981 {
     }
 
     function approve(address operator, uint256 id) public override {
-        _checkHallSet();
+        if (!hallSet) revert HallNotFixed();
         if (operator != theHall) {
-            emit ApprovalRestricted(id, operator);
             revert OnlyMarketplace();
         }
         super.approve(operator, id);
+        emit Approved(id, operator);
     }
 
     function setApprovalForAll(address operator, bool approved) public override {
-        _checkHallSet();
+        if (!hallSet) revert HallNotFixed();
         if (operator != theHall) {
-            emit ApprovalRestricted(type(uint256).max, operator);
             revert OnlyMarketplace();
         }
         super.setApprovalForAll(operator, approved);
+        emit Approved(0, operator); 
     }
 
     function transferFrom(address from, address to, uint256 id) public override {
-        _checkHallSet();
+        if (!hallSet) revert HallNotFixed();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.transferFrom(from, to, id);
+        emit TokenTransfered(from, to, id);
     }
 
     function safeTransferFrom(address from, address to, uint256 id) public override {
-        _checkHallSet();
+        if (!hallSet) revert HallNotFixed();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.safeTransferFrom(from, to, id);
+        emit TokenTransfered(from, to, id);
     }
 
     function safeTransferFrom(address from, address to, uint256 id, bytes calldata data) public override {
-        _checkHallSet();
+        if (!hallSet) revert HallNotFixed();
         if (msg.sender != theHall) {
             revert TransferRestricted(id, from, to);
         }
         super.safeTransferFrom(from, to, id, data);
+        emit TokenTransfered(from, to, id);
     }
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC2981) returns (bool) {
