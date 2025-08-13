@@ -34,8 +34,6 @@ contract sTokenTest is Test {
 
     function testApprove_RevertsWhenOperatorIsNotTheHall() public {
         vm.startPrank(alice);
-        vm.expectEmit(true, true, false, true);
-        emit sToken.ApprovalRestricted(1, bob);
         vm.expectRevert(sToken.OnlyMarketplace.selector);
         token.approve(bob, 1);
     }
@@ -48,8 +46,6 @@ contract sTokenTest is Test {
 
     function testSetApprovalForAll_RevertsWhenOperatorIsNotTheHall() public {
         vm.startPrank(alice);
-        vm.expectEmit(false, true, false, true);
-        emit sToken.ApprovalRestricted(type(uint256).max, bob);
         vm.expectRevert(sToken.OnlyMarketplace.selector);
         token.setApprovalForAll(bob, true);
     }

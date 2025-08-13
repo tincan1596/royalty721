@@ -13,7 +13,6 @@ contract sToken is ERC721, ERC2981 {
     error DontActSmart();
 
     event Minted(uint256 indexed id, address indexed to);
-    event TransferBlocked(uint256 indexed id, address indexed from, address indexed to);
     event Approved(uint256 indexed id, address indexed operator);
     event HallSet(address indexed hall);
     event TokenTransfered(address indexed from, address indexed to, uint256 indexed id);
