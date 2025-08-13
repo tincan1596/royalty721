@@ -64,7 +64,7 @@ contract sToken is ERC721, ERC2981 {
             revert OnlyMarketplace();
         }
         super.setApprovalForAll(operator, approved);
-        emit Approved(0, operator); 
+        emit Approved(0, operator);
     }
 
     function transferFrom(address from, address to, uint256 id) public override {

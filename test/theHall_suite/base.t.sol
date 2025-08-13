@@ -36,7 +36,7 @@ contract BaseTheHallTest is Test {
 
         // Transfer a token to owner
         vm.startPrank(owner);
-        stoken.mint(owner,0);
+        stoken.mint(owner, 0);
 
         // transfer token to seller
         stoken.setApprovalForAll(address(hall), true);

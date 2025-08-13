@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import "forge-std/Test.sol";
 import {BaseTheHallTest} from "./base.t.sol";
 import {TheHall, ISToken} from "../../src/theHall/theHall.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -107,10 +106,9 @@ contract Unit_Revert is BaseTheHallTest {
         hall.createListing(0, 1);
     }
 
-    // test InvalidRoyalty by using malicious token 
+    // test InvalidRoyalty by using malicious token
 
     function testBuyToken_invalidRoyalty_reverts() public {
-        
         MockBadRoyalty bad = new MockBadRoyalty(seller);
         vm.expectRevert();
         new TheHall(IERC20(address(usdc)), ISToken(address(bad)));
