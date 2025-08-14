@@ -73,7 +73,7 @@ contract hallFuzzTest is BaseTheHallTest {
         vm.stopPrank();
     }
 
-    function testFuzz_withdrawStuckTokens_InvalidWithdrawal( uint256 amount) public {
+    function testFuzz_withdrawStuckTokens_InvalidWithdrawal(uint256 amount) public {
         amount = bound(amount, 0, 1);
         address to = address(0);
         vm.startPrank(owner);
@@ -86,8 +86,8 @@ contract hallFuzzTest is BaseTheHallTest {
         vm.startPrank(seller);
         usdc.transfer(address(hall), 500e6);
         vm.stopPrank();
-        
-        amount = bound(amount, usdc.balanceOf(address(hall)) + 1e6 , type(uint128).max);
+
+        amount = bound(amount, usdc.balanceOf(address(hall)) + 1e6, type(uint128).max);
         vm.assume(to != address(0) && amount > 0);
         vm.startPrank(owner);
         vm.expectRevert(TheHall.InvalidWithdrawal.selector);
@@ -98,11 +98,11 @@ contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_transactionFlow_Success(uint256 price) public {
         price = boundPrice(price);
         createAndListToken(TOKEN_ID, price);
-        uint256 royalty_check = price * 5 / 100; 
+        uint256 royalty_check = price * 5 / 100;
 
         (address recv, uint256 royalty) = stoken.royaltyInfo(TOKEN_ID, price);
-        assertEq(royalty, royalty_check); 
-        assertEq(recv, owner); 
+        assertEq(royalty, royalty_check);
+        assertEq(recv, owner);
         uint256 difference = price - royalty;
 
         vm.startPrank(buyer);
