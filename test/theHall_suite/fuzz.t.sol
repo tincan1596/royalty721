@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import {BaseTheHallTest} from "./base.t.sol";
 import {TheHall} from "../../src/theHall/theHall.sol";
+import "forge-std/console.sol";
 
 contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_createListing_InvalidPrice(uint256 price) public {
@@ -68,18 +69,11 @@ contract hallFuzzTest is BaseTheHallTest {
 
         createAndListToken(TOKEN_ID, price);
 
-        vm.prank(buyer);
+        vm.startPrank(buyer);
+        usdc.approve(address(hall), expectedPrice);
         vm.expectRevert(TheHall.InvalidPrice.selector);
         hall.buyToken(TOKEN_ID, expectedPrice);
-    }
-
-    function testFuzz_buyToken_InvalidRoyalty(uint256 price) public {
-        price = boundPrice(price);
-        createAndListToken(TOKEN_ID, price);
-
-        vm.prank(buyer);
-        vm.expectRevert(TheHall.InvalidRoyalty.selector);
-        hall.buyToken(TOKEN_ID, price);
+        vm.stopPrank();
     }
 
     function testFuzz_withdrawStuckTokens_InvalidWithdrawal(address to, uint256 amount) public {

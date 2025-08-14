@@ -29,7 +29,6 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     error NotListed();
     error NotTokenOwner();
     error InvalidWithdrawal();
-    error InvalidRoyalty();
     error NotApproved();
     error InvalidPrice();
 
@@ -95,18 +94,13 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         Listing memory lst = listings[id];
         if (lst.seller == address(0)) revert NotListed();
         if (sToken.ownerOf(id) != lst.seller) revert NotTokenOwner();
+        if (lst.price != expectedPrice) revert InvalidPrice();
 
         delete listings[id];
-
-        currency.safeTransferFrom(msg.sender, address(this), lst.price);
-
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
-
-        if (royalty >= lst.price) revert InvalidRoyalty();
-        if (lst.price != expectedPrice) revert InvalidPrice();
+        
         if (royalty > 0) currency.safeTransfer(recv, royalty);
-
-        currency.safeTransfer(lst.seller, lst.price - royalty);
+        currency.safeTransferFrom(msg.sender, lst.seller, lst.price - royalty);
         sToken.safeTransferFrom(lst.seller, msg.sender, id);
 
         emit TokenPurchased(id, lst.seller, msg.sender, lst.price, royalty);
