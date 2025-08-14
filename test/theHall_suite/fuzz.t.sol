@@ -16,9 +16,11 @@ contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_createListing_AlreadyListed(uint256 price) public {
         price = boundPrice(price);
         approveMarketplaceAsSeller(TOKEN_ID);
+        vm.startPrank(seller);
         hall.createListing(TOKEN_ID, price);
         vm.expectRevert(TheHall.AlreadyListed.selector);
         hall.createListing(TOKEN_ID, price);
+        vm.stopPrank();
     }
 
     function testFuzz_createListing_NotApproved(uint256 price) public {
@@ -71,17 +73,21 @@ contract hallFuzzTest is BaseTheHallTest {
         vm.stopPrank();
     }
 
-    function testFuzz_withdrawStuckTokens_InvalidWithdrawal(address to, uint256 amount) public {
-        amount = bound(amount, 1, 1e18);
-        vm.assume(to == address(0) || amount == 0);
+    function testFuzz_withdrawStuckTokens_InvalidWithdrawal( uint256 amount) public {
+        amount = bound(amount, 0, 1);
+        address to = address(0);
+        vm.startPrank(owner);
         vm.expectRevert(TheHall.InvalidWithdrawal.selector);
         hall.withdrawStuckTokens(address(usdc), amount, to);
+        vm.stopPrank();
     }
 
     function testFuzz_withdrawStuckTokens_AmountExceedsBalance(address to, uint256 amount) public {
         amount = bound(amount, usdc.balanceOf(address(hall)), type(uint128).max);
         vm.assume(to != address(0) && amount > 0);
+        vm.startPrank(owner);
         vm.expectRevert(TheHall.InvalidWithdrawal.selector);
         hall.withdrawStuckTokens(address(usdc), amount, to);
+        vm.stopPrank();
     }
 }
