@@ -83,7 +83,11 @@ contract hallFuzzTest is BaseTheHallTest {
     }
 
     function testFuzz_withdrawStuckTokens_AmountExceedsBalance(address to, uint256 amount) public {
-        amount = bound(amount, usdc.balanceOf(address(hall)), type(uint128).max);
+        vm.startPrank(seller);
+        usdc.transfer(address(hall), 500e6);
+        vm.stopPrank();
+        
+        amount = bound(amount, usdc.balanceOf(address(hall)) + 1e6 , type(uint128).max);
         vm.assume(to != address(0) && amount > 0);
         vm.startPrank(owner);
         vm.expectRevert(TheHall.InvalidWithdrawal.selector);
