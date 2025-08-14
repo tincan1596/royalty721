@@ -94,4 +94,25 @@ contract hallFuzzTest is BaseTheHallTest {
         hall.withdrawStuckTokens(address(usdc), amount, to);
         vm.stopPrank();
     }
+
+    function testFuzz_transactionFlow_Success(uint256 price) public {
+        price = boundPrice(price);
+        createAndListToken(TOKEN_ID, price);
+        uint256 royalty_check = price * 5 / 100; 
+
+        (address recv, uint256 royalty) = stoken.royaltyInfo(TOKEN_ID, price);
+        assertEq(royalty, royalty_check); 
+        assertEq(recv, owner); 
+        uint256 difference = price - royalty;
+
+        vm.startPrank(buyer);
+        usdc.approve(address(hall), price);
+        hall.buyToken(TOKEN_ID, price);
+        vm.stopPrank();
+
+        assertEq(usdc.balanceOf(seller), INITIAL_USDC_SUPPLY + difference);
+        assertEq(usdc.balanceOf(buyer), INITIAL_USDC_SUPPLY - price);
+        assertEq(usdc.balanceOf(owner), royalty);
+        assertEq(stoken.ownerOf(TOKEN_ID), buyer);
+    }
 }
