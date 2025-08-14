@@ -16,7 +16,9 @@ contract BaseTheHallTest is Test {
     address internal seller = makeAddr("seller");
     address internal buyer = makeAddr("buyer");
     uint256 internal constant INITIAL_USDC_SUPPLY = 1_000_000e6;
-    uint256 internal constant TOKEN_PRICE = 100e6;
+    uint256 internal constant MIN_PRICE = 1e6;
+    uint256 internal constant MAX_PRICE = 10e6;
+    uint256 internal constant TOKEN_ID = 0;
 
     function setUp() public virtual {
         vm.startPrank(owner);
@@ -34,18 +36,9 @@ contract BaseTheHallTest is Test {
         usdc.mint(seller, INITIAL_USDC_SUPPLY);
         vm.stopPrank();
 
-        // Transfer a token to owner
+        // Transfer a token to seller
         vm.startPrank(owner);
-        stoken.mint(owner, 0);
-
-        // transfer token to seller
-        stoken.setApprovalForAll(address(hall), true);
-        hall.createListing(0, TOKEN_PRICE);
-        vm.stopPrank();
-        vm.startPrank(seller);
-        usdc.approve(address(hall), TOKEN_PRICE);
-        hall.buyToken(0, TOKEN_PRICE);
-        vm.stopPrank();
+        stoken.mint(seller, TOKEN_ID);
     }
 
     function approveMarketplaceAsSeller(uint256 tokenId) internal {
@@ -64,6 +57,16 @@ contract BaseTheHallTest is Test {
     function fundBuyer(uint256 amount) internal {
         vm.startPrank(owner);
         usdc.mint(buyer, amount);
+        vm.stopPrank();
+    }
+
+    function boundPrice(uint256 price) internal pure returns (uint256) {
+    return bound(price, MIN_PRICE, MAX_PRICE);
+    }
+
+    function mintToken(address to, uint256 tokenId) internal {
+        vm.startPrank(owner);
+        stoken.mint(to, tokenId);
         vm.stopPrank();
     }
 }
