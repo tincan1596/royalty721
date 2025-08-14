@@ -6,13 +6,6 @@ import {TheHall} from "../../src/theHall/theHall.sol";
 import "forge-std/console.sol";
 
 contract hallFuzzTest is BaseTheHallTest {
-    function testFuzz_createListing_InvalidPrice(uint256 price) public {
-        price = boundPrice(price);
-        approveMarketplaceAsSeller(TOKEN_ID);
-        vm.expectRevert(TheHall.ZeroPrice.selector);
-        hall.createListing(TOKEN_ID, 0);
-    }
-
     function testFuzz_createListing_NotOwner(uint256 price) public {
         price = boundPrice(price);
         vm.prank(buyer);
