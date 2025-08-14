@@ -9,7 +9,7 @@ contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_createListing_NotOwner(uint256 price) public {
         price = boundPrice(price);
         vm.prank(buyer);
-        vm.expectRevert(TheHall.NotOwner.selector);
+        vm.expectRevert(TheHall.NotTokenOwner.selector);
         hall.createListing(TOKEN_ID, price);
     }
 
@@ -47,12 +47,14 @@ contract hallFuzzTest is BaseTheHallTest {
         price = boundPrice(price);
         expectedPrice = boundPrice(expectedPrice);
 
-        createAndListToken(TOKEN_ID, price);
-        mintToken(owner, TOKEN_ID + 1);
+        vm.prank(owner);
+        stoken.mint(owner, TOKEN_ID + 1);
 
-        vm.prank(buyer);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), TOKEN_ID);
         vm.expectRevert(TheHall.NotTokenOwner.selector);
-        hall.buyToken(TOKEN_ID + 1, expectedPrice);
+        hall.createListing(TOKEN_ID + 1, price);
+        vm.stopPrank();
     }
 
     function testFuzz_buyToken_InvalidPrice(uint256 price, uint256 expectedPrice) public {

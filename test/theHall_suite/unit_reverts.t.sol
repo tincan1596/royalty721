@@ -14,7 +14,7 @@ contract Unit_Revert is BaseTheHallTest {
 
     function testCreateListing_notOwner_reverts() public {
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(TheHall.NotOwner.selector));
+        vm.expectRevert(abi.encodeWithSelector(TheHall.NotTokenOwner.selector));
         hall.createListing(0, 1);
     }
 

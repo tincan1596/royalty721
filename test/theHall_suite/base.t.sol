@@ -40,6 +40,7 @@ contract BaseTheHallTest is Test {
         // Transfer a token to seller
         vm.startPrank(owner);
         stoken.mint(seller, TOKEN_ID);
+        vm.stopPrank();
     }
 
     function approveMarketplaceAsSeller(uint256 tokenId) internal {

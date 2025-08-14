@@ -23,7 +23,6 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     using SafeERC20 for IERC20;
 
     error ZeroPrice();
-    error NotOwner();
     error AlreadyListed();
     error NotSeller();
     error NotListed();
@@ -72,7 +71,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
     function createListing(uint256 id, uint256 price) external whenNotPaused {
         if (price == 0) revert ZeroPrice();
-        if (sToken.ownerOf(id) != msg.sender) revert NotOwner();
+        if (sToken.ownerOf(id) != msg.sender) revert NotTokenOwner();
         if (listings[id].seller != address(0)) revert AlreadyListed();
         if (sToken.getApproved(id) != address(this) && !sToken.isApprovedForAll(msg.sender, address(this))) {
             revert NotApproved();
