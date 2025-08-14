@@ -16,6 +16,7 @@ contract BaseTheHallTest is Test {
     address internal seller = makeAddr("seller");
     address internal buyer = makeAddr("buyer");
     uint256 internal constant INITIAL_USDC_SUPPLY = 1_000_000e6;
+    uint256 internal constant TOKEN_PRICE = 100e6;
     uint256 internal constant MIN_PRICE = 1e6;
     uint256 internal constant MAX_PRICE = 10e6;
     uint256 internal constant TOKEN_ID = 0;
@@ -61,7 +62,7 @@ contract BaseTheHallTest is Test {
     }
 
     function boundPrice(uint256 price) internal pure returns (uint256) {
-    return bound(price, MIN_PRICE, MAX_PRICE);
+        return bound(price, MIN_PRICE, MAX_PRICE);
     }
 
     function mintToken(address to, uint256 tokenId) internal {

@@ -5,7 +5,6 @@ import {BaseTheHallTest} from "./base.t.sol";
 import {TheHall} from "../../src/theHall/theHall.sol";
 
 contract hallFuzzTest is BaseTheHallTest {
-
     function testFuzz_createListing_InvalidPrice(uint256 price) public {
         price = boundPrice(price);
         approveMarketplaceAsSeller(TOKEN_ID);
