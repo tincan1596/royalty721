@@ -81,7 +81,7 @@ contract BaseTheHallTest is Test {
         vm.stopPrank();
     }
 
-    function special(address to, uint256 tokenId) internal {
+    function specialSeller(address to, uint256 tokenId) internal {
         vm.startPrank(owner);
         stoken.mint(to, tokenId);
         vm.stopPrank();
@@ -90,5 +90,13 @@ contract BaseTheHallTest is Test {
         stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, TOKEN_PRICE);
         vm.stopPrank();
+    }
+
+    function specialBuyer(address from) internal {
+        vm.prank(owner);
+        usdc.mint(from, INITIAL_USDC_SUPPLY);
+
+        vm.prank(from);
+        usdc.approve(address(hall), INITIAL_USDC_SUPPLY);
     }
 }
