@@ -92,11 +92,11 @@ contract BaseTheHallTest is Test {
         vm.stopPrank();
     }
 
-    function specialBuyer(address from) internal {
+    function specialBuyer(address from, uint256 amount) internal {
         vm.prank(owner);
-        usdc.mint(from, INITIAL_USDC_SUPPLY);
+        usdc.mint(from, amount);
 
         vm.prank(from);
-        usdc.approve(address(hall), INITIAL_USDC_SUPPLY);
+        usdc.approve(address(hall), amount);
     }
 }

@@ -14,4 +14,9 @@ contract mUSDC is ERC20, Ownable {
         _mint(to, amount);
         emit Minted(to, amount);
     }
+
+    function burn(address from, uint256 amount) external onlyOwner {
+        require(balanceOf[from] >= amount, "Insufficient balance to burn");
+        _burn(from, amount);
+    }
 }
