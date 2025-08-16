@@ -8,8 +8,13 @@ contract TheHallInvariantTest is BaseTheHallTest {
     address buyer1 = makeAddr("buyer1");
     address seller2 = makeAddr("seller2");
     address buyer2 = makeAddr("buyer2");
+    uint256 cost = 100e6;
+    uint256 cost1 = 200e6;
+    uint256 cost2 = 300e6;
 
     function setUp() public override {
+        super.setUp();
+
         specialSeller(seller1, 2);
         specialSeller(seller2, 4);
 
@@ -20,10 +25,10 @@ contract TheHallInvariantTest is BaseTheHallTest {
         vm.stopPrank();
     }
 
-    function makeList(address by, uint256 cost, uint256 id) internal {
+    function makeList(address by, uint256 price, uint256 id) internal {
         vm.startPrank(by);
         stoken.approve(address(hall), id);
-        hall.createListing(id, cost);
+        hall.createListing(id, price);
         vm.stopPrank;
     }
 
@@ -32,9 +37,9 @@ contract TheHallInvariantTest is BaseTheHallTest {
         hall.cancelListing(id);
     }
 
-    function buy(address by, uint256 id, uint256 cost) internal {
+    function buy(address by, uint256 id, uint256 price) internal {
         vm.startPrank(by);
-        hall.buyToken(id, cost);
+        hall.buyToken(id, price);
         vm.stopPrank();
     }
 
@@ -72,7 +77,7 @@ contract TheHallInvariantTest is BaseTheHallTest {
     }
 
     // currency circulation
-    function invariant_currencyCirculation(uint256 cost, uint256 cost1, uint256 cost2) public {
+    function invariant_currencyCirculation() public {
         cost = boundPrice(cost);
         listCancel(seller, 0);
         listCancel(seller1, 2);
