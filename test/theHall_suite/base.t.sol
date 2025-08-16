@@ -21,6 +21,15 @@ contract BaseTheHallTest is Test {
     uint256 internal constant MAX_PRICE = 10e6;
     uint256 internal constant TOKEN_ID = 0;
 
+    error ZeroPrice();
+    error AlreadyListed();
+    error NotSeller();
+    error NotListed();
+    error NotTokenOwner();
+    error InvalidWithdrawal();
+    error NotApproved();
+    error InvalidPrice();
+
     function setUp() public virtual {
         vm.startPrank(owner);
         usdc = new mUSDC();
@@ -69,6 +78,17 @@ contract BaseTheHallTest is Test {
     function mintToken(address to, uint256 tokenId) internal {
         vm.startPrank(owner);
         stoken.mint(to, tokenId);
+        vm.stopPrank();
+    }
+
+    function special(address to, uint256 tokenId) internal {
+        vm.startPrank(owner);
+        stoken.mint(to, tokenId);
+        vm.stopPrank();
+
+        vm.startPrank(to);
+        stoken.approve(address(hall), tokenId);
+        hall.createListing(tokenId, TOKEN_PRICE);
         vm.stopPrank();
     }
 }

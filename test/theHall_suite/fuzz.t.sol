@@ -2,14 +2,13 @@
 pragma solidity ^0.8.30;
 
 import {BaseTheHallTest} from "./base.t.sol";
-import {TheHall} from "../../src/theHall/theHall.sol";
 import "forge-std/console.sol";
 
 contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_createListing_NotOwner(uint256 price) public {
         price = boundPrice(price);
         vm.prank(buyer);
-        vm.expectRevert(TheHall.NotTokenOwner.selector);
+        vm.expectRevert(NotTokenOwner.selector);
         hall.createListing(TOKEN_ID, price);
     }
 
@@ -18,7 +17,7 @@ contract hallFuzzTest is BaseTheHallTest {
         approveMarketplaceAsSeller(TOKEN_ID);
         vm.startPrank(seller);
         hall.createListing(TOKEN_ID, price);
-        vm.expectRevert(TheHall.AlreadyListed.selector);
+        vm.expectRevert(AlreadyListed.selector);
         hall.createListing(TOKEN_ID, price);
         vm.stopPrank();
     }
@@ -26,7 +25,7 @@ contract hallFuzzTest is BaseTheHallTest {
     function testFuzz_createListing_NotApproved(uint256 price) public {
         price = boundPrice(price);
         vm.prank(seller);
-        vm.expectRevert(TheHall.NotApproved.selector);
+        vm.expectRevert(NotApproved.selector);
         hall.createListing(TOKEN_ID, price);
     }
 
@@ -34,14 +33,14 @@ contract hallFuzzTest is BaseTheHallTest {
         price = boundPrice(price);
         createAndListToken(TOKEN_ID, price);
         vm.prank(buyer);
-        vm.expectRevert(TheHall.NotSeller.selector);
+        vm.expectRevert(NotSeller.selector);
         hall.cancelListing(TOKEN_ID);
     }
 
     function testFuzz_buyToken_NotListed(uint256 expectedPrice) public {
         expectedPrice = boundPrice(expectedPrice);
         vm.prank(buyer);
-        vm.expectRevert(TheHall.NotListed.selector);
+        vm.expectRevert(NotListed.selector);
         hall.buyToken(TOKEN_ID, expectedPrice);
     }
 
@@ -54,7 +53,7 @@ contract hallFuzzTest is BaseTheHallTest {
 
         vm.startPrank(seller);
         stoken.approve(address(hall), TOKEN_ID);
-        vm.expectRevert(TheHall.NotTokenOwner.selector);
+        vm.expectRevert(NotTokenOwner.selector);
         hall.createListing(TOKEN_ID + 1, price);
         vm.stopPrank();
     }
@@ -68,7 +67,7 @@ contract hallFuzzTest is BaseTheHallTest {
 
         vm.startPrank(buyer);
         usdc.approve(address(hall), expectedPrice);
-        vm.expectRevert(TheHall.InvalidPrice.selector);
+        vm.expectRevert(InvalidPrice.selector);
         hall.buyToken(TOKEN_ID, expectedPrice);
         vm.stopPrank();
     }
@@ -77,7 +76,7 @@ contract hallFuzzTest is BaseTheHallTest {
         amount = bound(amount, 0, 1);
         address to = address(0);
         vm.startPrank(owner);
-        vm.expectRevert(TheHall.InvalidWithdrawal.selector);
+        vm.expectRevert(InvalidWithdrawal.selector);
         hall.withdrawStuckTokens(address(usdc), amount, to);
         vm.stopPrank();
     }
@@ -90,7 +89,7 @@ contract hallFuzzTest is BaseTheHallTest {
         amount = bound(amount, usdc.balanceOf(address(hall)) + 1e6, type(uint128).max);
         vm.assume(to != address(0) && amount > 0);
         vm.startPrank(owner);
-        vm.expectRevert(TheHall.InvalidWithdrawal.selector);
+        vm.expectRevert(InvalidWithdrawal.selector);
         hall.withdrawStuckTokens(address(usdc), amount, to);
         vm.stopPrank();
     }
