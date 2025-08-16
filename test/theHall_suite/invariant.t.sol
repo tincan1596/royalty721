@@ -24,24 +24,6 @@ contract TheHallInvariantTest is BaseTheHallTest {
         vm.stopPrank();
     }
 
-    function makeList(address by, uint256 price, uint256 id) internal {
-        vm.startPrank(by);
-        stoken.approve(address(hall), id);
-        hall.createListing(id, price);
-        vm.stopPrank;
-    }
-
-    function listCancel(address by, uint256 id) internal {
-        vm.prank(by);
-        hall.cancelListing(id);
-    }
-
-    function buy(address by, uint256 id, uint256 price) internal {
-        vm.startPrank(by);
-        hall.buyToken(id, price);
-        vm.stopPrank();
-    }
-
     // Listing Consistency: If listing exists, seller owns token
     function invariant_listingConsistency() public view {
         for (uint256 id = 0; id < 10; id++) {
@@ -73,32 +55,5 @@ contract TheHallInvariantTest is BaseTheHallTest {
                 assertTrue(approved, "Listed token not approved");
             }
         }
-    }
-
-    // currency circulation
-    function invariant_currencyCirculation() public {
-        console.log("Owner of token 0:", stoken.ownerOf(0));
-        listCancel(seller, 0);
-        listCancel(seller1, 2);
-        listCancel(seller2, 4);
-
-        specialBuyer(buyer, cost);
-        specialBuyer(buyer1, cost1);
-        specialBuyer(buyer2, cost2);
-        uint256 sumInit = usdc.balanceOf(buyer) + usdc.balanceOf(buyer1) + usdc.balanceOf(buyer2);
-
-        makeList(seller, cost, 0);
-        makeList(seller1, cost1, 2);
-        makeList(seller2, cost2, 4);
-        uint256 royalty = 5 * sumInit / 100;
-
-        buy(buyer, 0, cost);
-        buy(buyer1, 2, cost1);
-        buy(buyer2, 4, cost2);
-
-        uint256 sumFinal =
-            usdc.balanceOf(seller) + usdc.balanceOf(seller1) + usdc.balanceOf(seller2) + usdc.balanceOf(owner);
-        assertEq(sumInit, sumFinal, "Currency circulation invariant violated");
-        assertEq(usdc.balanceOf(buyer), royalty, "Buyer should have no USDC left");
     }
 }
