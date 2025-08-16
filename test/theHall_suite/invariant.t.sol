@@ -20,7 +20,6 @@ contract TheHallInvariantTest is BaseTheHallTest {
 
         vm.startPrank(owner);
         usdc.burn(seller, usdc.balanceOf(seller));
-        usdc.burn(owner, usdc.balanceOf(owner));
         usdc.burn(buyer, usdc.balanceOf(buyer));
         vm.stopPrank();
     }
@@ -78,7 +77,7 @@ contract TheHallInvariantTest is BaseTheHallTest {
 
     // currency circulation
     function invariant_currencyCirculation() public {
-        cost = boundPrice(cost);
+        console.log("Owner of token 0:", stoken.ownerOf(0));
         listCancel(seller, 0);
         listCancel(seller1, 2);
         listCancel(seller2, 4);
