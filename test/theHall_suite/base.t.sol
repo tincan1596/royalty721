@@ -91,12 +91,4 @@ contract BaseTheHallTest is Test {
         hall.createListing(tokenId, TOKEN_PRICE);
         vm.stopPrank();
     }
-
-    function specialBuyer(address from, uint256 amount) internal {
-        vm.prank(owner);
-        usdc.mint(from, amount);
-
-        vm.prank(from);
-        usdc.approve(address(hall), amount);
-    }
 }
