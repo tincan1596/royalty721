@@ -31,21 +31,17 @@ contract InvariantHallTest is Test {
         assertEq(handler.sumPrice(), handler.sumRoyalty() + handler.sumRevenue());
     }
 
-    // royalty rate: sumRoyalty * 100 == sumPrice * 5  (exact 5%)
+    // royalty check
     function invariant_royalty_rate() public view {
-        // Multiplying avoids fractional rounding.
-        assertEq(handler.sumRoyalty() * 100, handler.sumPrice() * 5);
+        assertEq(handler.sumRoyalty() * 100, handler.sumPrice() * 5); // Multiplying avoids fractional rounding.
     }
 
-    /// ownership sanity: no dual owners
+    // ownership sanity
     function invariant_no_double_ownership() public view {
         for (uint256 id = 0; id < 10; ++id) {
             try stoken.ownerOf(id) returns (address o) {
-                // minted token must have a non-zero owner
                 require(o != address(0), "owner zero for minted token");
-            } catch {
-                // ownerOf reverted -> token not minted yet; that's OK
-            }
+            } catch {}
         }
     }
 }

@@ -115,7 +115,7 @@ contract HallHandler {
         buy(bSeed, rawId);
     }
 
-    // === Internals ===
+    // Internals
 
     function _ensureMinted(address to, uint256 tokenId) internal {
         // If nobody owns the tokenId yet, mint it
