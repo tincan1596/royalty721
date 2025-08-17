@@ -95,10 +95,12 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         if (sToken.ownerOf(id) != lst.seller) revert NotTokenOwner();
         if (lst.price != expectedPrice) revert InvalidPrice();
 
-        delete listings[id];
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
+        if (royalty == 0) revert InvalidPrice();
 
-        if (royalty > 0) currency.safeTransferFrom(msg.sender, recv, royalty);
+        delete listings[id];
+
+        currency.safeTransferFrom(msg.sender, recv, royalty);
         currency.safeTransferFrom(msg.sender, lst.seller, lst.price - royalty);
         sToken.safeTransferFrom(lst.seller, msg.sender, id);
 
