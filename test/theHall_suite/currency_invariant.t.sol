@@ -24,6 +24,11 @@ contract InvariantHallTest is Test {
         handler = new HallHandler(address(usdc), address(stoken), address(hall), stokenOwner);
 
         targetContract(address(handler));
+        bytes4[] memory selectors = new bytes4[](3);
+        selectors[0] = handler.mintAndList.selector;
+        selectors[1] = handler.buy.selector;
+        selectors[2] = handler.mintListBuy.selector;
+        targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
     }
 
     // global accounting: sumPrice == sumRoyalty + sumRevenue

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.30;
 
 import {Vm} from "forge-std/Vm.sol";
 
@@ -36,6 +36,12 @@ interface IHall {
 }
 
 contract HallHandler {
+    event log(string message);
+    event check(address buyer, address seller, uint256 tokenId, uint256 price, uint256 royalty);
+    event location(address addr);
+
+    error Fail();
+
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     IMUSDC public immutable usdc;
@@ -55,6 +61,7 @@ contract HallHandler {
     }
 
     function mintAndList(uint256 seed, uint256 rawId, uint256 rawPrice, uint256 approveModeSeed) public {
+        emit log("mintAndList called");
         address seller = _addr(seed);
         uint256 tokenId = rawId % 10;
         uint256 price = _price(rawPrice);
@@ -82,11 +89,12 @@ contract HallHandler {
     }
 
     function buy(uint256 seed, uint256 rawId) public {
+        emit log("buy called");
         address buyer = _addr(seed);
         uint256 tokenId = rawId % 10;
 
         IHall.Listing memory lst = hall.listings(tokenId);
-        if (lst.price == 0 || lst.seller == address(0) || lst.seller == buyer) return;
+        if (lst.price == 0 || lst.seller == address(0) || lst.seller == buyer) revert Fail();
 
         uint256 price = lst.price;
 
@@ -108,9 +116,12 @@ contract HallHandler {
             sumRevenue += revenue;
         } catch {}
         vm.stopPrank();
+
+        emit check(buyer, lst.seller, tokenId, price, royalty);
     }
 
     function mintListBuy(uint256 sSeed, uint256 bSeed, uint256 rawId, uint256 rawPrice, uint256 approveSeed) external {
+        emit log("mintListBuy called");
         mintAndList(sSeed, rawId, rawPrice, approveSeed);
         buy(bSeed, rawId);
     }
@@ -118,6 +129,7 @@ contract HallHandler {
     // Internals
 
     function _ensureMinted(address to, uint256 tokenId) internal {
+        emit log("_ensureMinted called");
         // If nobody owns the tokenId yet, mint it
         try stoken.ownerOf(tokenId) returns (address owner) {
             if (owner != address(0)) return;
@@ -128,11 +140,15 @@ contract HallHandler {
         }
     }
 
-    function _addr(uint256 seed) internal pure returns (address) {
-        return address(uint160(uint256(keccak256(abi.encode(seed)))));
+    function _addr(uint256 seed) internal returns (address) {
+        emit log("_addr called");
+        address addr = address(uint160(uint256(keccak256(abi.encode(seed)))));
+        emit location(addr);
+        return addr;
     }
 
-    function _price(uint256 x) internal pure returns (uint256) {
+    function _price(uint256 x) internal returns (uint256) {
+        emit log("_price called");
         uint256 minP = 10e6;
         uint256 maxP = 1_000e6;
         return (x % (maxP - minP + 1e6)) + minP;
