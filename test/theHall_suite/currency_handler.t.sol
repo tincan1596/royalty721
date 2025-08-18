@@ -36,12 +36,6 @@ interface IHall {
 }
 
 contract HallHandler is Test {
-    event Consolelog(string message);
-    event check(address buyer, address seller, uint256 tokenId, uint256 price, uint256 royalty);
-    event location(address addr);
-
-    error Fail();
-
     IMUSDC public immutable usdc;
     IStoken public immutable stoken;
     IHall public immutable hall;
@@ -60,40 +54,49 @@ contract HallHandler is Test {
     }
 
     function mintAndList(uint256 seed, uint256 rawId, uint256 rawPrice, uint256 approveModeSeed) public {
-        emit Consolelog("mintAndList called");
-        address seller = _addr(seed);
-        uint256 tokenId = rawId % 10;
+        address prospect = _addr(seed);
+        uint256 tokenId = rawId % 100_000;
         uint256 price = _price(rawPrice);
 
-        // Mint if not owned by anyone
-        _ensureMinted(seller, tokenId);
+        address seller = _ensureMinted(prospect, tokenId);
 
-        // Approve hall if needed
-        if (!stoken.isApprovedForAll(seller, address(hall)) && stoken.getApproved(tokenId) != address(hall)) {
+        // check if not listed
+        if (hall.listings(tokenId).seller == address(0)) {
             vm.startPrank(seller);
-            if (approveModeSeed % 2 == 0) {
-                stoken.setApprovalForAll(address(hall), true);
-            } else {
-                stoken.approve(address(hall), tokenId);
+
+            // approval if not listed
+            if (stoken.getApproved(tokenId) != address(hall) && !stoken.isApprovedForAll(seller, address(hall))) {
+                if (approveModeSeed % 2 == 0) {
+                    stoken.approve(address(hall), tokenId);
+                } else {
+                    stoken.setApprovalForAll(address(hall), true);
+                }
             }
-            vm.stopPrank();
-        }
 
-        // List
-        if (stoken.ownerOf(tokenId) == seller) {
-            vm.startPrank(seller);
-            try hall.createListing(tokenId, price) {} catch {}
+            hall.createListing(tokenId, price);
             vm.stopPrank();
+        } else {
+            // approval if listed
+            if (stoken.getApproved(tokenId) != address(hall) && !stoken.isApprovedForAll(seller, address(hall))) {
+                if (approveModeSeed % 2 == 0) {
+                    stoken.approve(address(hall), tokenId);
+                } else {
+                    stoken.setApprovalForAll(address(hall), true);
+                }
+            }
         }
     }
 
     function buy(uint256 seed, uint256 rawId) internal {
-        emit Consolelog("buy called");
         address buyer = _addr(seed);
-        uint256 tokenId = rawId % 10;
+        uint256 tokenId = rawId % 100_000;
 
         IHall.Listing memory lst = hall.listings(tokenId);
-        if (lst.price == 0 || lst.seller == address(0) || lst.seller == buyer) return;
+
+        vm.assume(lst.price != 0);
+        vm.assume(lst.seller != address(0));
+        vm.assume(lst.seller != buyer);
+        vm.assume(buyer != address(0));
 
         uint256 price = lst.price;
 
@@ -119,38 +122,39 @@ contract HallHandler is Test {
             sumRevenue += revenue;
         } catch {}
         vm.stopPrank();
-
-        emit check(buyer, lst.seller, tokenId, price, royalty);
     }
 
     function mintListBuy(uint256 sSeed, uint256 bSeed, uint256 rawId, uint256 rawPrice, uint256 approveSeed) external {
-        emit Consolelog("mintListBuy called");
         mintAndList(sSeed, rawId, rawPrice, approveSeed);
         buy(bSeed, rawId);
     }
 
-    function _ensureMinted(address to, uint256 tokenId) internal {
-        emit Consolelog("_ensureMinted called");
-        // If nobody owns the tokenId yet, mint it
-        try stoken.ownerOf(tokenId) returns (address owner) {
-            if (owner != address(0)) return;
+    function _ensureMinted(address to, uint256 tokenId) internal returns (address seller) {
+        address currentOwner;
+        try stoken.ownerOf(tokenId) returns (address o) {
+            currentOwner = o;
         } catch {
+            currentOwner = address(0);
+        }
+
+        if (currentOwner == address(0)) {
             vm.startPrank(stokenOwner);
             stoken.mint(to, tokenId);
             vm.stopPrank();
+            return to;
+        } else {
+            return currentOwner;
         }
     }
 
-    function _addr(uint256 seed) internal returns (address) {
-        emit Consolelog("_addr called");
-        uint256 Addr = bound(seed, 1, 100);
+    function _addr(uint256 seed) internal pure returns (address) {
+        uint256 Addr = bound(seed, 1, 20);
         address addr = address(uint160(uint256(keccak256(abi.encode(Addr)))));
-        emit location(addr);
+
         return addr;
     }
 
-    function _price(uint256 x) internal returns (uint256) {
-        emit Consolelog("_price called");
+    function _price(uint256 x) internal pure returns (uint256) {
         return bound(x, 10e6, 1000e6);
     }
 }
