@@ -27,7 +27,7 @@ contract InvariantHallTest is Test {
 
         bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = handler.mintAndList.selector;
-        //selectors[1] = handler.buy.selector;
+        //selectors[2] = handler.buy.selector;
         selectors[1] = handler.mintListBuy.selector;
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
     }
@@ -39,7 +39,7 @@ contract InvariantHallTest is Test {
 
     // royalty check
     function invariant_royalty_rate() public view {
-        assertEq(handler.sumRoyalty() * 100, handler.sumPrice() * 5);
+        assertEq(handler.sumRoyalty() * 100 + handler.sumDust(), handler.sumPrice() * 5);
     }
 
     // ownership sanity

@@ -47,6 +47,7 @@ contract HallHandler is Test {
     IHall public immutable hall;
     address public immutable stokenOwner;
 
+    uint256 public sumDust;
     uint256 public sumPrice;
     uint256 public sumRoyalty;
     uint256 public sumRevenue;
@@ -106,10 +107,13 @@ contract HallHandler is Test {
         // compute royalty
         (, uint256 royalty) = stoken.royaltyInfo(tokenId, price);
         uint256 revenue = price - royalty;
+        uint256 r5 = price * 5;
+        uint256 dust = r5 % 100;
 
         // buy
         vm.startPrank(buyer);
         try hall.buyToken(tokenId, price) {
+            sumDust += dust;
             sumPrice += price;
             sumRoyalty += royalty;
             sumRevenue += revenue;
@@ -125,8 +129,6 @@ contract HallHandler is Test {
         buy(bSeed, rawId);
     }
 
-    // Internals
-
     function _ensureMinted(address to, uint256 tokenId) internal {
         emit Consolelog("_ensureMinted called");
         // If nobody owns the tokenId yet, mint it
@@ -141,7 +143,8 @@ contract HallHandler is Test {
 
     function _addr(uint256 seed) internal returns (address) {
         emit Consolelog("_addr called");
-        address addr = address(uint160(uint256(keccak256(abi.encode(seed)))));
+        uint256 Addr = bound(seed, 1, 100);
+        address addr = address(uint160(uint256(keccak256(abi.encode(Addr)))));
         emit location(addr);
         return addr;
     }
