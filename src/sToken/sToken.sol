@@ -10,7 +10,7 @@ contract sToken is ERC721, ERC2981 {
     error TransferRestricted(uint256 id, address from, address to);
     error HallFixed();
     error HallNotFixed();
-    error DontActSmart();
+    error NotOwner();
 
     event Minted(uint256 indexed id, address indexed to);
     event Approved(uint256 indexed id, address indexed operator);
@@ -33,13 +33,13 @@ contract sToken is ERC721, ERC2981 {
     }
 
     function mint(address to, uint256 id) external {
-        if (msg.sender != owner) revert DontActSmart();
+        if (msg.sender != owner) revert NotOwner();
         _mint(to, id);
         emit Minted(id, to);
     }
 
     function setTheHall(address _theHall) external {
-        if (msg.sender != owner) revert DontActSmart();
+        if (msg.sender != owner) revert NotOwner();
         if (_theHall == address(0)) revert HallNotFixed();
         if (hallSet) revert HallFixed();
         hallSet = true;

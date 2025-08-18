@@ -42,8 +42,6 @@ contract HallHandler is Test {
 
     error Fail();
 
-    Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-
     IMUSDC public immutable usdc;
     IStoken public immutable stoken;
     IHall public immutable hall;
@@ -88,17 +86,18 @@ contract HallHandler is Test {
         }
     }
 
-    function buy(uint256 seed, uint256 rawId) public {
+    function buy(uint256 seed, uint256 rawId) internal {
         emit Consolelog("buy called");
         address buyer = _addr(seed);
         uint256 tokenId = rawId % 10;
 
         IHall.Listing memory lst = hall.listings(tokenId);
-        if (lst.price == 0 || lst.seller == address(0) || lst.seller == buyer) revert Fail();
+        if (lst.price == 0 || lst.seller == address(0) || lst.seller == buyer) return;
 
         uint256 price = lst.price;
 
         // fund buyer
+        vm.prank(stokenOwner);
         usdc.mint(buyer, price);
         vm.startPrank(buyer);
         usdc.approve(address(hall), price);

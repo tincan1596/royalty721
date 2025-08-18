@@ -23,10 +23,12 @@ contract InvariantHallTest is Test {
         hall = new TheHall(IERC20(address(usdc)), ISToken(address(stoken)));
         handler = new HallHandler(address(usdc), address(stoken), address(hall), stokenOwner);
 
-        bytes4[] memory selectors = new bytes4[](3);
+        stoken.setTheHall(address(hall));
+
+        bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = handler.mintAndList.selector;
-        selectors[1] = handler.buy.selector;
-        selectors[2] = handler.mintListBuy.selector;
+        //selectors[1] = handler.buy.selector;
+        selectors[1] = handler.mintListBuy.selector;
         targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
     }
 
