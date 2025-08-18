@@ -21,9 +21,10 @@ contract InvariantHallTest is Test {
         usdc = new mUSDC();
         stoken = new sToken();
         hall = new TheHall(IERC20(address(usdc)), ISToken(address(stoken)));
-        handler = new HallHandler(address(usdc), address(stoken), address(hall), stokenOwner);
 
         stoken.setTheHall(address(hall));
+
+        handler = new HallHandler(address(usdc), address(stoken), address(hall), stokenOwner);
 
         bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = handler.mintAndList.selector;
