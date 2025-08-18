@@ -16,6 +16,7 @@ contract sToken is ERC721, ERC2981 {
     event Approved(uint256 indexed id, address indexed operator);
     event HallSet(address indexed hall);
     event TokenTransfered(address indexed from, address indexed to, uint256 indexed id);
+    event OwnerSet(address indexed owner);
 
     address public theHall;
     address public immutable owner;
@@ -27,6 +28,8 @@ contract sToken is ERC721, ERC2981 {
         theHall = address(0);
         owner = msg.sender;
         _setDefaultRoyalty(owner, 500);
+
+        emit OwnerSet(owner);
     }
 
     function mint(address to, uint256 id) external {

@@ -38,7 +38,7 @@ contract InvariantHallTest is Test {
 
     // royalty check
     function invariant_royalty_rate() public view {
-        assertEq(handler.sumRoyalty() * 100, handler.sumPrice() * 5); // Multiplying avoids fractional rounding.
+        assertEq(handler.sumRoyalty() * 100, handler.sumPrice() * 5);
     }
 
     // ownership sanity
