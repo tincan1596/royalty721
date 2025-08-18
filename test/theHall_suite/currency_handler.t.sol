@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Vm} from "forge-std/Vm.sol";
+import "forge-std/Test.sol";
 
 interface IMUSDC {
     function mint(address to, uint256 amount) external;
@@ -35,8 +35,8 @@ interface IHall {
     function buyToken(uint256 id, uint256 expectedPrice) external;
 }
 
-contract HallHandler {
-    event log(string message);
+contract HallHandler is Test {
+    event Consolelog(string message);
     event check(address buyer, address seller, uint256 tokenId, uint256 price, uint256 royalty);
     event location(address addr);
 
@@ -61,7 +61,7 @@ contract HallHandler {
     }
 
     function mintAndList(uint256 seed, uint256 rawId, uint256 rawPrice, uint256 approveModeSeed) public {
-        emit log("mintAndList called");
+        emit Consolelog("mintAndList called");
         address seller = _addr(seed);
         uint256 tokenId = rawId % 10;
         uint256 price = _price(rawPrice);
@@ -89,7 +89,7 @@ contract HallHandler {
     }
 
     function buy(uint256 seed, uint256 rawId) public {
-        emit log("buy called");
+        emit Consolelog("buy called");
         address buyer = _addr(seed);
         uint256 tokenId = rawId % 10;
 
@@ -121,7 +121,7 @@ contract HallHandler {
     }
 
     function mintListBuy(uint256 sSeed, uint256 bSeed, uint256 rawId, uint256 rawPrice, uint256 approveSeed) external {
-        emit log("mintListBuy called");
+        emit Consolelog("mintListBuy called");
         mintAndList(sSeed, rawId, rawPrice, approveSeed);
         buy(bSeed, rawId);
     }
@@ -129,7 +129,7 @@ contract HallHandler {
     // Internals
 
     function _ensureMinted(address to, uint256 tokenId) internal {
-        emit log("_ensureMinted called");
+        emit Consolelog("_ensureMinted called");
         // If nobody owns the tokenId yet, mint it
         try stoken.ownerOf(tokenId) returns (address owner) {
             if (owner != address(0)) return;
@@ -141,16 +141,14 @@ contract HallHandler {
     }
 
     function _addr(uint256 seed) internal returns (address) {
-        emit log("_addr called");
+        emit Consolelog("_addr called");
         address addr = address(uint160(uint256(keccak256(abi.encode(seed)))));
         emit location(addr);
         return addr;
     }
 
     function _price(uint256 x) internal returns (uint256) {
-        emit log("_price called");
-        uint256 minP = 10e6;
-        uint256 maxP = 1_000e6;
-        return (x % (maxP - minP + 1e6)) + minP;
+        emit Consolelog("_price called");
+        return bound(x, 10e6, 1000e6);
     }
 }
