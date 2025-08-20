@@ -20,23 +20,23 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly   # <-- Add this to lock Foundry version
 
       - name: Show Forge version
-        run: |
-          forge --version
+        run: forge --version
 
       - name: Run Forge fmt
-        run: |
-          forge fmt --check
+        run: forge fmt --check
         id: fmt
 
       - name: Run Forge build
-        run: |
-          forge build --sizes
+        run: forge build --sizes
         id: build
 
       - name: Run Forge tests
-        if: ${{!env.skip_test}} 
-        run: |
-          forge test -vvv
+        if: ${{ !env.skip_test }}
+        env:                                   # <-- Add RPC secrets here
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} # noqa
+        run: forge test -vvv
         id: test
