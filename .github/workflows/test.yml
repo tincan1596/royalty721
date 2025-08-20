@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Forge tests
         if: ${{ !env.skip_test }}
-        env:                                   # <-- Add RPC secrets here
+        env:                                   
           MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} # noqa
-        run: forge test -vvv
+        run: forge test -vvvj
         id: test
