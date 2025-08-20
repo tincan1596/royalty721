@@ -37,6 +37,12 @@ jobs:
       - name: Run Forge tests
         if: ${{ !env.skip_test }}
         env:                                   
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} # noqa
-        run: forge test -vvvj
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} 
+        run: forge test -vvv
         id: test
+
+      - name: Cache Foundry fork data
+        uses: actions/cache@v3
+        with:
+          path: ~/.foundry/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
