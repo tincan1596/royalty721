@@ -7,7 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  skip_test: false
+  skip_test: 'false'
 
 jobs:
   check:
@@ -21,7 +21,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly   # <-- Add this to lock Foundry version
+          version: stable   # <-- Add this to lock Foundry version
 
       - name: Show Forge version
         run: forge --version
@@ -34,15 +34,16 @@ jobs:
         run: forge build --sizes
         id: build
 
-      - name: Run Forge tests
-        if: ${{ !env.skip_test }}
-        env:                                   
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} 
-        run: forge test -vvv
-        id: test
-
       - name: Cache Foundry fork data
         uses: actions/cache@v3
         with:
           path: ~/.foundry/cache
-          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}    
+
+      - name: Run Forge tests
+        if: env.skip_test != 'true'
+        env:                                   
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} 
+        run: forge test -vvv 
+        id: test
+

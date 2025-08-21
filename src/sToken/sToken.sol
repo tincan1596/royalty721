@@ -47,7 +47,8 @@ contract sToken is ERC721, ERC2981 {
         emit HallSet(_theHall);
     }
 
-    function tokenURI(uint256 id) public pure override returns (string memory) {
+    function tokenURI(uint256 id) public view override returns (string memory) {
+        theHall; // dummy read to satisfy linter
         return string(abi.encodePacked(baseURI, Strings.toString(id), _JSON_SUFFIX));
     }
 
