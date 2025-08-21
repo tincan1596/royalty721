@@ -7,7 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  skip_test: 'true'
+  skip_test: 'false'
 
 jobs:
   check:
@@ -21,7 +21,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: 1.3.1   # <-- Add this to lock Foundry version
+          version: stable   # <-- Add this to lock Foundry version
 
       - name: Show Forge version
         run: forge --version
