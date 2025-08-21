@@ -16,7 +16,6 @@ contract sTokenTest is Test {
         vm.startPrank(owner);
         token = new sToken();
         hall = new TheHall(IERC20(address(0)), ISToken(address(token)));
-        token.setTheHall(address(hall));
         vm.stopPrank();
     }
 
@@ -127,6 +126,7 @@ contract sTokenTest is Test {
     function testTransferFrom() public {
         vm.startPrank(owner);
         token.mint(alice, 1);
+        token.setTheHall(address(hall));
         vm.stopPrank();
 
         vm.prank(alice);
@@ -141,9 +141,6 @@ contract sTokenTest is Test {
         vm.startPrank(owner);
         token.mint(alice, 1);
         vm.stopPrank();
-
-        vm.prank(alice);
-        token.approve(address(hall), 1);
 
         vm.prank(alice);
         vm.expectRevert(sToken.HallNotFixed.selector);
