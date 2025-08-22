@@ -7,12 +7,13 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
   skip_test: 'false'
+  CHAIN: mainnet           # <-- change this for other chains
+  BLOCK_NUMBER: 18000000   # <-- change this for different fork blocks
 
 jobs:
-  check:
-    name: Foundry project
+  unit-tests:
+    name: Unit & Fuzz Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,14 +30,11 @@ jobs:
 
       - name: Run Forge fmt
         run: forge fmt --check
-        id: fmt
 
       - name: Run Forge build
         run: forge build --sizes
-        id: build
 
       - name: Cache project build cache
-        if: env.skip_test != 'true'
         uses: actions/cache@v3
         with:
           path: cache
@@ -44,16 +42,54 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-foundry-build-
 
-      - name: Cache Foundry fork data
+      - name: Run Forge tests (unit only, no fork)
         if: env.skip_test != 'true'
+        run: forge test -vvv --skip "fork"  
+
+  fork-tests:
+    name: Fork Tests (main only)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Cache Foundry fork data
         uses: actions/cache@v3
         with:
-          path: ~/.foundry/cache
-          key: ${{ runner.os }}-foundry-global-${{ hashFiles('foundry.toml') }}-${{ env.MAINNET_RPC_URL }}
+          path: |
+            ~/.foundry/cache/rpc
+            ~/.foundry/cache/signatures
+            .anvil-state
+          key: ${{ runner.os }}-foundry-rpc-${{ env.CHAIN }}-${{ env.BLOCK_NUMBER }}
           restore-keys: |
-            ${{ runner.os }}-foundry-global-
+            ${{ runner.os }}-foundry-rpc-${{ env.CHAIN }}-
+            ${{ runner.os }}-foundry-rpc-
 
-      - name: Run Forge tests
+      - name: Start Anvil (forked, persistent state)
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+        run: |
+          mkdir -p .anvil-state
+          nohup anvil \
+            --fork-url "$MAINNET_RPC_URL" \
+            --fork-block-number $BLOCK_NUMBER \
+            --state .anvil-state/${CHAIN}-${BLOCK_NUMBER}.json \
+            --port 8545 --silent > anvil.log 2>&1 &
+          for i in {1..30}; do nc -z 127.0.0.1 8545 && break || sleep 1; done
+          echo "Anvil is up"
+
+      - name: Run Forge fork tests
         if: env.skip_test != 'true'
-        run: forge test -vvv --fork-url $MAINNET_RPC_URL
-        id: test
+        env:
+          FORK_URL: http://127.0.0.1:8545
+        run: forge test -vvv --fork-url $FORK_URL --match-path "test/fork/*"
+
+      - name: Stop Anvil
+        run: pkill -f "^anvil" || true

@@ -10,14 +10,10 @@ remappings = [
 ]
 
 [profile.ci]
-src = "src"
-out = "out"
-libs = ["lib"]
-
 optimizer = false
-
 fuzz_runs = 256
-
 gas_reports = []
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[profile.ci.rpc_storage_caching]
+chains = ["mainnet"]
+endpoints = "remote"
