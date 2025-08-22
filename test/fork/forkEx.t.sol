@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 
-/* interface IERC20 {
+interface IERC20 {
     function balanceOf(address) external view returns (uint256);
 }
 
@@ -25,4 +25,4 @@ contract ExampleForkTest is Test {
         // Should hold at least 1000 DAI
         assertGt(bal, 1000e18);
     }
-}*/
+}

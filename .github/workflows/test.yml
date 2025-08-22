@@ -7,6 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
+  MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
   skip_test: 'false'
 
 jobs:
@@ -21,7 +22,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable   # <-- Add this to lock Foundry version
+          version: stable
 
       - name: Show Forge version
         run: forge --version
@@ -34,16 +35,25 @@ jobs:
         run: forge build --sizes
         id: build
 
+      - name: Cache project build cache
+        if: env.skip_test != 'true'
+        uses: actions/cache@v3
+        with:
+          path: cache
+          key: ${{ runner.os }}-foundry-build-${{ hashFiles('foundry.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-build-
+
       - name: Cache Foundry fork data
+        if: env.skip_test != 'true'
         uses: actions/cache@v3
         with:
           path: ~/.foundry/cache
-          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.toml') }}    
+          key: ${{ runner.os }}-foundry-global-${{ hashFiles('foundry.toml') }}-${{ env.MAINNET_RPC_URL }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-global-
 
       - name: Run Forge tests
         if: env.skip_test != 'true'
-        env:                                   
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }} 
-        run: forge test -vvv 
+        run: forge test -vvv --fork-url $MAINNET_RPC_URL
         id: test
-
