@@ -9,4 +9,11 @@ remappings = [
   "solmate/=lib/solmate/src/"
 ]
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[profile.ci]
+optimizer = false
+fuzz_runs = 256
+gas_reports = []
+
+[profile.ci.rpc_storage_caching]
+chains = ["mainnet"]
+endpoints = "remote"
