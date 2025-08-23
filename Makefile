@@ -1,16 +1,16 @@
-.PHONY: anvilRun test clean
+.PHONY: anvilRun test clean kill status
 
 anvilRun:
 	./script/anvilRun.sh
 
 test:
-	forge test -vvv
+	forge test -vvv --fork-url ${FORK_URL} --match-path "test/fork/*"
 
 clean:
-	rm -rf .anvil-state
+	rm -rf .anvil
 
-anvilKill:
+kill:
 	pkill -f "^anvil" || true
 
-anvilCheck:
+status:
 	nc -z 127.0.0.1 8545 && echo "Anvil is up" || echo "Anvil is down"

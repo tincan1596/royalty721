@@ -2,18 +2,20 @@
 set -euo pipefail
 
 # Load env vars if .env exists
-[ -f .env ] && export $(grep -v '^#' .env | xargs)
+#[ -f .env ] && export $(grep -v '^#' .env | xargs)
 
 # Defaults if not set
-: "${CHAIN:=mainnet}"
-: "${BLOCK_NUMBER:=18000000}"
+#: "${CHAIN:=mainnet}"
+#: "${BLOCK_NUMBER:=18000000}"
 
-STATE_FILE=".anvil-state/${CHAIN}-${BLOCK_NUMBER}.json"
+STATE_FILE=".anvil/${CHAIN}-${BLOCK_NUMBER}.json"
 
 echo "  Starting Anvil fork:"
 echo "  Chain:        $CHAIN"
 echo "  Block number: $BLOCK_NUMBER"
 echo "  State file:   $STATE_FILE"
+
+mkdir -p .anvil
 
 anvil \
   --fork-url "$MAINNET_RPC_URL" \
