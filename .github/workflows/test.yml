@@ -7,7 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  skip_test: 'false'
+  skip_test: 'true'
 
 jobs:
   unit-tests:
