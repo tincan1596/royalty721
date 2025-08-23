@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {BaseTheHallTest} from "./base.t.sol";
+import {BaseTheHallTest} from "../unit/base.t.sol";
 import "forge-std/console.sol";
 
 contract hallFuzzTest is BaseTheHallTest {
