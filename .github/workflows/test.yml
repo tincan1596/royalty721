@@ -8,8 +8,6 @@ on:
 env:
   FOUNDRY_PROFILE: ci
   skip_test: 'false'
-  CHAIN: mainnet           # <-- change this for other chains
-  BLOCK_NUMBER: 18000000   # <-- change this for different fork blocks
 
 jobs:
   unit-tests:
@@ -49,7 +47,12 @@ jobs:
   fork-tests:
     name: Fork Tests (main only)
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'    
+    if: github.ref == 'refs/heads/main'
+    env:
+      MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+      FORK_URL: http://127.0.0.1:8545    
+      CHAIN: mainnet           
+      BLOCK_NUMBER: 18000000  
     steps:
       - uses: actions/checkout@v4
         with:
@@ -73,8 +76,6 @@ jobs:
             ${{ runner.os }}-foundry-rpc-
 
       - name: Start Anvil (forked, persistent state)
-        env:
-          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
         run: |
           mkdir -p .anvil-state
           nohup anvil \
@@ -87,8 +88,6 @@ jobs:
 
       - name: Run Forge fork tests
         if: env.skip_test != 'true'
-        env:
-          FORK_URL: http://127.0.0.1:8545
         run: forge test -vvv --fork-url $FORK_URL --match-path "test/fork/*"
 
       - name: Stop Anvil
