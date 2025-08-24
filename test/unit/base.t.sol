@@ -28,7 +28,7 @@ contract BaseTheHallTest is Test {
     error NotTokenOwner();
     error InvalidWithdrawal();
     error NotApproved();
-    error InvalidPrice();
+    error InvalidAmount();
 
     function setUp() public virtual {
         vm.startPrank(owner);

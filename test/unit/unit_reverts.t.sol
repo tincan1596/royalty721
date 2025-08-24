@@ -52,7 +52,7 @@ contract Unit_Revert is BaseTheHallTest {
         hall.buyToken(9999, 1);
     }
 
-    function testBuyToken_invalidPrice_reverts() public {
+    function testBuyToken_invalidAmount_reverts() public {
         uint256 id = 0;
 
         approveMarketplaceAsSeller(id);
@@ -63,7 +63,7 @@ contract Unit_Revert is BaseTheHallTest {
         usdc.approve(address(hall), TOKEN_PRICE);
 
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(TheHall.InvalidPrice.selector));
+        vm.expectRevert(abi.encodeWithSelector(TheHall.InvalidAmount.selector));
         hall.buyToken(id, 99);
     }
 

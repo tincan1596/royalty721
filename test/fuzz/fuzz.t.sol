@@ -58,7 +58,7 @@ contract hallFuzzTest is BaseTheHallTest {
         vm.stopPrank();
     }
 
-    function testFuzz_buyToken_InvalidPrice(uint256 price, uint256 expectedPrice) public {
+    function testFuzz_buyToken_InvalidAmount(uint256 price, uint256 expectedPrice) public {
         price = boundPrice(price);
         expectedPrice = boundPrice(expectedPrice);
         vm.assume(expectedPrice != price);
@@ -67,7 +67,7 @@ contract hallFuzzTest is BaseTheHallTest {
 
         vm.startPrank(buyer);
         usdc.approve(address(hall), expectedPrice);
-        vm.expectRevert(InvalidPrice.selector);
+        vm.expectRevert(InvalidAmount.selector);
         hall.buyToken(TOKEN_ID, expectedPrice);
         vm.stopPrank();
     }
