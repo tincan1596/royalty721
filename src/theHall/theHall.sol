@@ -30,6 +30,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     error InvalidWithdrawal();
     error NotApproved();
     error InvalidAmount();
+    error SellerCannotBeBuyer();
 
     struct Listing {
         address seller;
@@ -94,6 +95,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
         if (lst.seller == address(0)) revert NotListed();
         if (sToken.ownerOf(id) != lst.seller) revert NotTokenOwner();
         if (lst.price != expectedPrice) revert InvalidAmount();
+        if (lst.seller == msg.sender) revert SellerCannotBeBuyer();
 
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
         if (royalty == 0) revert InvalidAmount();
