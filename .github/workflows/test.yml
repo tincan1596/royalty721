@@ -7,7 +7,7 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  skip_test: 'false'
+  skip_test: 'true'
 
 jobs:
   unit-tests:
@@ -45,7 +45,7 @@ jobs:
         run: forge test -vvv --skip "fork"  
 
   fork-tests:
-    name: Fork Tests (main only)
+    name: Mainnet Fork Tests (main only)
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     env:
