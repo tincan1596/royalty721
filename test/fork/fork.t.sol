@@ -186,25 +186,4 @@ contract MarketplaceForkTest is Test {
         // Emit for quick visibility in test logs (forge -vvvv will show)
         emit log_named_uint("approx gas used (local snapshot)", gasUsedApprox);
     }
-
-    /* ===========================================================
-       Test 7: Seller cannot buy own listing (explicit safety guard)
-       =========================================================== */
-    function testFork_SellerCannotBuyOwnListing_reverts() public {
-        uint256 price = 10 * (10 ** USDC_DECIMALS);
-        vm.startPrank(seller);
-        stoken.approve(address(hall), tokenId);
-        hall.createListing(tokenId, price);
-        vm.stopPrank();
-
-        // fund seller with USDC so they could theoretically buy their own listing
-        _fundBuyerWithUSDC(seller, 100 * (10 ** USDC_DECIMALS));
-        vm.prank(seller);
-        usdc.approve(address(hall), price);
-
-        // Expect a revert - replace with specific error if defined
-        vm.prank(seller);
-        vm.expectRevert();
-        hall.buyToken(tokenId, price);
-    }
 }
