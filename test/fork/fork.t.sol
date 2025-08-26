@@ -10,9 +10,8 @@ contract MarketplaceForkTest is Test {
     sToken public stoken;
     IERC20 public usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
-    address constant USDC_WHALE = address(0x1111111111111111111111111111111111111111);
+    address constant USDC_WHALE = address(0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341);
 
-    // Test actors
     address seller = address(0xDeaDBeefDeaDBeefDeaDBeefDeaDBeefDeaD1);
     address buyer = address(0xBEEf000000000000000000000000000000000001);
     address owner = address(0xFeE1face00000000000000000000000000000002);
@@ -176,14 +175,12 @@ contract MarketplaceForkTest is Test {
         vm.prank(buyer);
         usdc.approve(address(hall), price);
 
-        // measure gas by sending tx via a helper contract or using cheatcodes
         uint256 gasBefore = gasleft();
         vm.prank(buyer);
         hall.buyToken(tokenId, price);
         uint256 gasAfter = gasleft();
-        // This is an approximate local measure — for more precise per-tx gas use foundry’s -vvvv or tx receipts.
         uint256 gasUsedApprox = gasBefore - gasAfter;
-        // Emit for quick visibility in test logs (forge -vvvv will show)
+
         emit log_named_uint("approx gas used (local snapshot)", gasUsedApprox);
     }
 }
