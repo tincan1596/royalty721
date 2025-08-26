@@ -12,9 +12,9 @@ contract MarketplaceForkTest is Test {
 
     address constant USDC_WHALE = address(0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341);
 
-    address seller = address(0xDeaDBeefDeaDBeefDeaDBeefDeaDBeefDeaD1);
-    address buyer = address(0xBEEf000000000000000000000000000000000001);
-    address owner = address(0xFeE1face00000000000000000000000000000002);
+    address seller = address(0x28C6c06298d514Db089934071355E5743bf21d60);
+    address buyer = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+    address owner = address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
     uint256 tokenId = 1;
 
     uint256 constant ROYALTY_BP = 500;
