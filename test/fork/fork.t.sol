@@ -155,7 +155,7 @@ contract MarketplaceForkTest is Test {
         vm.prank(buyer);
         hall.buyToken(tokenId, price);
 
-        uint256 royalty = (price * ROYALTY_BP) / 10000; // should be integer in USDC units
+        uint256 royalty = (price * ROYALTY_BP) / 10000;
         uint256 sellerShare = price - royalty;
 
         assertEq(usdc.balanceOf(owner), ownerBefore + royalty);
