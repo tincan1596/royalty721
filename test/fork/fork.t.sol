@@ -22,6 +22,12 @@ contract MarketplaceForkTest is Test {
     uint256 constant USDC_DECIMALS = 6;
 
     function setUp() public {
+        string[] memory inputs = new string[](3);
+        inputs[0] = "cast";
+        inputs[1] = "rpc";
+        inputs[2] = "anvil_reset";
+        vm.ffi(inputs);
+
         vm.startPrank(owner);
         stoken = new sToken();
         hall = new TheHall(usdc, ISToken(address(stoken)));
@@ -102,7 +108,7 @@ contract MarketplaceForkTest is Test {
         hall.createListing(tokenId, price);
         vm.stopPrank();
 
-        vm.prank(buyer);
+        vm.startPrank(buyer);
         vm.expectRevert();
         hall.buyToken(tokenId, price);
     }
