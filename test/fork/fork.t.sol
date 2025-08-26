@@ -51,21 +51,20 @@ contract MarketplaceForkTest is Test {
         vm.stopPrank();
 
         _fundBuyerWithUSDC(buyer, 1000 * (10 ** USDC_DECIMALS));
-
-        vm.prank(buyer);
-        usdc.approve(address(hall), price);
-
         uint256 sellerBefore = usdc.balanceOf(seller);
         uint256 ownerBefore = usdc.balanceOf(owner);
 
-        vm.prank(buyer);
+        vm.startPrank(buyer);
+        usdc.approve(address(hall), price);
         hall.buyToken(tokenId, price);
+        vm.stopPrank();
 
         assertEq(stoken.ownerOf(tokenId), buyer);
 
-        uint256 royalty = (price * ROYALTY_BP) / 10000;
+        (address recv, uint256 royalty) = stoken.royaltyInfo(tokenId, price);
         uint256 sellerShare = price - royalty;
 
+        assertEq(recv, owner);
         assertEq(usdc.balanceOf(owner), ownerBefore + royalty);
         assertEq(usdc.balanceOf(seller), sellerBefore + sellerShare);
     }
@@ -77,8 +76,10 @@ contract MarketplaceForkTest is Test {
         uint256 price = 15 * (10 ** USDC_DECIMALS);
 
         // Create initial listing
-        vm.prank(seller);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         // Seller changes listing to simulate front-run or price change
         vm.prank(seller);
@@ -87,7 +88,7 @@ contract MarketplaceForkTest is Test {
         hall.createListing(tokenId, price + (1 * (10 ** USDC_DECIMALS)));
 
         vm.prank(buyer);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(TheHall.InvalidAmount.selector));
         hall.buyToken(tokenId, price);
     }
 
@@ -96,8 +97,10 @@ contract MarketplaceForkTest is Test {
        =========================================================== */
     function testFork_InsufficientAllowanceOrBalance_reverts() public {
         uint256 price = 20 * (10 ** USDC_DECIMALS);
-        vm.prank(seller);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         vm.prank(buyer);
         vm.expectRevert();
@@ -128,8 +131,10 @@ contract MarketplaceForkTest is Test {
        =========================================================== */
     function testFork_RoyaltyAndRounding_USDCDecimals() public {
         uint256 price = 1 * (10 ** USDC_DECIMALS);
-        vm.prank(seller);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         _fundBuyerWithUSDC(buyer, 10 * (10 ** USDC_DECIMALS));
         vm.prank(buyer);
@@ -153,8 +158,10 @@ contract MarketplaceForkTest is Test {
        =========================================================== */
     function testFork_GasMeasurements_buyToken() public {
         uint256 price = 5 * (10 ** USDC_DECIMALS);
-        vm.prank(seller);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         _fundBuyerWithUSDC(buyer, 100 * (10 ** USDC_DECIMALS));
         vm.prank(buyer);
@@ -176,8 +183,10 @@ contract MarketplaceForkTest is Test {
        =========================================================== */
     function testFork_SellerCannotBuyOwnListing_reverts() public {
         uint256 price = 10 * (10 ** USDC_DECIMALS);
-        vm.prank(seller);
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         // fund seller with USDC so they could theoretically buy their own listing
         _fundBuyerWithUSDC(seller, 100 * (10 ** USDC_DECIMALS));
