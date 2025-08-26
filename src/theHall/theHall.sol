@@ -31,6 +31,7 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
     error NotApproved();
     error InvalidAmount();
     error SellerCannotBeBuyer();
+    error InsufficientAllowance();
 
     struct Listing {
         address seller;
@@ -99,6 +100,9 @@ contract TheHall is ReentrancyGuard, Pausable, Ownable {
 
         (address recv, uint256 royalty) = sToken.royaltyInfo(id, lst.price);
         if (royalty == 0) revert InvalidAmount();
+
+        uint256 allowance = currency.allowance(msg.sender, address(this));
+        if (allowance < lst.price) revert InsufficientAllowance();
 
         delete listings[id];
 
