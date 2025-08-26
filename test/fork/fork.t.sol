@@ -109,27 +109,30 @@ contract MarketplaceForkTest is Test {
         vm.stopPrank();
 
         vm.startPrank(buyer);
-        vm.expectRevert();
+        _fundBuyerWithUSDC(buyer, price);
+        usdc.approve(address(hall), 10 * (10 ** USDC_DECIMALS));
         hall.buyToken(tokenId, price);
+
+        vm.expectRevert(abi.encodeWithSelector(TheHall.InsufficientAllowance.selector));
+        hall.buyToken(tokenId, price);
+        vm.stopPrank();
     }
 
     /* ===========================================================
        Test 4: Hall must be set before listing (stoken.setTheHall one-time)
        =========================================================== */
     function testFork_HallNotSet_revertsOnCreateListing() public {
-        // Deploy a fresh stoken instance that doesn't have hall set (simulating misconfiguration)
         address tempOwner = address(0xCAFECaFe00000000000000000000000000000003);
-        vm.prank(tempOwner);
+        vm.startPrank(tempOwner);
         sToken s2 = new sToken();
-        // mint to seller2
         address seller2 = address(0xaAAA000000000000000000000000000000000004);
-        vm.prank(tempOwner);
         s2.mint(seller2, 2);
+        vm.stopPrank();
 
-        vm.prank(seller2);
-        vm.expectRevert();
-
-        hall.createListing(2, 1 * (10 ** USDC_DECIMALS));
+        vm.startPrank(seller2);
+        vm.expectRevert(abi.encodeWithSelector(sToken.HallNotFixed.selector));
+        s2.approve(address(hall), 2);
+        vm.stopPrank();
     }
 
     /* ===========================================================
