@@ -2,17 +2,15 @@
 pragma solidity ^0.8.30;
 
 import "forge-std/Test.sol";
-import "../../src/theHall/theHall.sol"; // adjust path/name if needed
-import "../../src/sToken/sToken.sol"; // adjust path/name if needed
+import "../../src/theHall/theHall.sol";
+import "../../src/sToken/sToken.sol";
 
-/// Minimal ERC20 interface used in tests (avoid extra imports)
 contract MarketplaceForkTest is Test {
     TheHall public hall;
     sToken public stoken;
-    IERC20 public usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); // mainnet USDC (6 decimals)
+    IERC20 public usdc = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
-    // === Replace this with a real mainnet USDC whale EOA (from token holders list) ===
-    address constant USDC_WHALE = address(0x1111111111111111111111111111111111111111); // <<-- REPLACE
+    address constant USDC_WHALE = address(0x1111111111111111111111111111111111111111);
 
     // Test actors
     address seller = address(0xDeaDBeefDeaDBeefDeaDBeefDeaDBeefDeaD1);
@@ -24,48 +22,41 @@ contract MarketplaceForkTest is Test {
     uint256 constant USDC_DECIMALS = 6;
 
     function setUp() public {
-        vm.prank(owner);
+        vm.startPrank(owner);
         stoken = new sToken();
-        hall = new TheHall(IERC20(address(usdc)), ISToken(address(stoken)));
-
-        vm.prank(owner);
+        hall = new TheHall(usdc, ISToken(address(stoken)));
         stoken.setTheHall(address(hall));
-
-        vm.prank(owner);
         stoken.mint(seller, tokenId);
+        vm.stopPrank();
+
         assertEq(stoken.ownerOf(tokenId), seller);
     }
 
-    /* -------------------------
-       Helper: fund buyer with USDC from a whale on fork
-       (Replace USDC_WHALE with a real mainnet whale address).
-       ------------------------- */
     function _fundBuyerWithUSDC(address _buyer, uint256 amount) internal {
-        // impersonate the whale and transfer USDC to buyer
         vm.startPrank(USDC_WHALE);
-        bool ok = IERC20(address(usdc)).transfer(_buyer, amount);
+        bool ok = usdc.transfer(_buyer, amount);
         require(ok, "whale transfer failed");
         vm.stopPrank();
     }
 
     /* ===========================================================
-       Test 1: Happy path using real mainnet USDC on a fork
-       - seller lists token
-       - buyer receives USDC from whale, approves hall, buys
-       - asserts ownership change and balances (USDC) match expected split
+       Test 1: Happy path for currency circulation (USDC)
        =========================================================== */
     function testFork_CreateListingAndBuy_USDC_happyPath() public {
         uint256 price = 10 * (10 ** USDC_DECIMALS);
-        vm.prank(seller);
+
+        vm.startPrank(seller);
+        stoken.approve(address(hall), tokenId);
         hall.createListing(tokenId, price);
+        vm.stopPrank();
 
         _fundBuyerWithUSDC(buyer, 1000 * (10 ** USDC_DECIMALS));
 
         vm.prank(buyer);
-        IERC20(address(usdc)).approve(address(hall), price);
+        usdc.approve(address(hall), price);
 
-        uint256 sellerBefore = IERC20(address(usdc)).balanceOf(seller);
-        uint256 ownerBefore = IERC20(address(usdc)).balanceOf(owner);
+        uint256 sellerBefore = usdc.balanceOf(seller);
+        uint256 ownerBefore = usdc.balanceOf(owner);
 
         vm.prank(buyer);
         hall.buyToken(tokenId, price);
@@ -75,8 +66,8 @@ contract MarketplaceForkTest is Test {
         uint256 royalty = (price * ROYALTY_BP) / 10000;
         uint256 sellerShare = price - royalty;
 
-        assertEq(IERC20(address(usdc)).balanceOf(owner), ownerBefore + royalty);
-        assertEq(IERC20(address(usdc)).balanceOf(seller), sellerBefore + sellerShare);
+        assertEq(usdc.balanceOf(owner), ownerBefore + royalty);
+        assertEq(usdc.balanceOf(seller), sellerBefore + sellerShare);
     }
 
     /* ===========================================================
@@ -108,9 +99,8 @@ contract MarketplaceForkTest is Test {
         vm.prank(seller);
         hall.createListing(tokenId, price);
 
-        // Buyer has no USDC / no approval
         vm.prank(buyer);
-        vm.expectRevert(); // transferFrom should revert or fail
+        vm.expectRevert();
         hall.buyToken(tokenId, price);
     }
 
@@ -143,10 +133,10 @@ contract MarketplaceForkTest is Test {
 
         _fundBuyerWithUSDC(buyer, 10 * (10 ** USDC_DECIMALS));
         vm.prank(buyer);
-        IERC20(address(usdc)).approve(address(hall), price);
+        usdc.approve(address(hall), price);
 
-        uint256 ownerBefore = IERC20(address(usdc)).balanceOf(owner);
-        uint256 sellerBefore = IERC20(address(usdc)).balanceOf(seller);
+        uint256 ownerBefore = usdc.balanceOf(owner);
+        uint256 sellerBefore = usdc.balanceOf(seller);
 
         vm.prank(buyer);
         hall.buyToken(tokenId, price);
@@ -154,8 +144,8 @@ contract MarketplaceForkTest is Test {
         uint256 royalty = (price * ROYALTY_BP) / 10000; // should be integer in USDC units
         uint256 sellerShare = price - royalty;
 
-        assertEq(IERC20(address(usdc)).balanceOf(owner), ownerBefore + royalty);
-        assertEq(IERC20(address(usdc)).balanceOf(seller), sellerBefore + sellerShare);
+        assertEq(usdc.balanceOf(owner), ownerBefore + royalty);
+        assertEq(usdc.balanceOf(seller), sellerBefore + sellerShare);
     }
 
     /* ===========================================================
@@ -168,7 +158,7 @@ contract MarketplaceForkTest is Test {
 
         _fundBuyerWithUSDC(buyer, 100 * (10 ** USDC_DECIMALS));
         vm.prank(buyer);
-        IERC20(address(usdc)).approve(address(hall), price);
+        usdc.approve(address(hall), price);
 
         // measure gas by sending tx via a helper contract or using cheatcodes
         uint256 gasBefore = gasleft();
@@ -192,7 +182,7 @@ contract MarketplaceForkTest is Test {
         // fund seller with USDC so they could theoretically buy their own listing
         _fundBuyerWithUSDC(seller, 100 * (10 ** USDC_DECIMALS));
         vm.prank(seller);
-        IERC20(address(usdc)).approve(address(hall), price);
+        usdc.approve(address(hall), price);
 
         // Expect a revert - replace with specific error if defined
         vm.prank(seller);
