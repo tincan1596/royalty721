@@ -4,7 +4,7 @@ anvilRun:
 	./script/anvilRun.sh
 
 test:
-	forge test -vvv --fork-url ${ANVIL_MAINNET} --match-path "test/fork/*"
+	forge test -vvv --fork-url ${ETH_RPC_URL} --match-path "test/fork/*"
 
 clean:
 	rm -rf .anvil
