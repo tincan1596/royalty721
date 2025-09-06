@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+set -a  
+source .env
+set +a
+
 STATE_FILE=".anvil/${CHAIN:-mainnet}-${BLOCK_NUMBER:-23226000}.json"
 
 
